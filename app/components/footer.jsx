@@ -3,29 +3,25 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-black text-white pt-10 pb-0">
+    <footer className="bg-black text-white pt-10  pb-4">
       <div className="container mx-auto px-4">
         {/* Locations Section */}
-        <div className="md:col-span-3 mb-6 flex items-center justify-center pb-5">
-          <div className="w-1/5">
-            <h2 className="text-lg font-semibold mb-0 mr-4">
-              Locations now issuing :
-            </h2>
-          </div>
-          <div className="w-4/5">
-            <p className="text-sm">
-              Jaffna | Colombo | Kilinochchi | Mannar | Vavuniya | Trincomalee |
-              Batticolo | Hatton | Nuwaraliya | Elle | Galle | Hambanthota |
-              Kandy | Dambulla | Chennai | Vietnam | Negombo
-            </p>
-          </div>
+        <div className="md:flex md:justify-between mb-6 pb-5 text-center md:text-left">
+          <h2 className="text-lg font-semibold mb-2 md:mb-0">
+            Locations now issuing:
+          </h2>
+          <p className="text-sm font-poppins">
+            Jaffna | Colombo | Kilinochchi | Mannar | Vavuniya | Trincomalee |
+            Batticolo | Hatton | Nuwaraliya | Elle | Galle | Hambanthota | Kandy
+            | Dambulla | Chennai | Vietnam | Negombo
+          </p>
         </div>
 
         {/* Grid Container for About, Quick Links, and Subscription Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About Section */}
-          <div className="flex flex-col w-1/2 items-center md:items-start ">
-            <div className="bg-gray-700 w-full h-24 mb-4"></div>
+          <div className="flex flex-col w-full md:w-1/2  items-center  md:items-center ">
+            <div className="bg-gray-700 w-1/2 items-center md:w-full h-24 mb-4"></div>
             <p className="text-sm text-center md:text-left">
               A small text about us with 2 or 3 sentences. A small text about us
               with 2 or 3 sentences. A small text about us with 2 or 3
@@ -77,8 +73,8 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-col items-center justify-stretch md:items-start">
-            <h2 className="text-xl font-semibold mb-4">Quick Links</h2>
+          <div className="flex flex-col items-center md:items-start mb-2 md:mb-0">
+            <h2 className="text-xl font-semibold mb-0 md:mb-4">Quick Links</h2>
             <ul className="text-sm space-y-2 text-center md:text-left">
               <li>
                 <a href="#" className="hover:underline">
@@ -115,10 +111,10 @@ const Footer = () => {
 
           {/* Subscription Section */}
           <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-xl font-semibold mb-4 text-center md:text-left">
               Join with us to get to know about the promotions
             </h2>
-            <form className="flex space-x-2 w-full max-w-md">
+            <form className="flex w-full max-w-md">
               <div className="flex-grow relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                   <svg
@@ -154,10 +150,10 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <hr class="h-px my-8 bg-gray-200 border-0 dark:bg-white"></hr>
+      <hr className="h-px my-3 bg-gray-200 border-0 dark:bg-white"></hr>
       {/* Footer Note */}
-      <div className=" text-right items-center ">
-        <p className="text-sm justify-center">
+      <div className="md:text-right text-center ">
+        <p className="text-sm">
           A product of Rispit | Made in Jaffna with{" "}
           <span className="text-red-500">❤</span>
         </p>

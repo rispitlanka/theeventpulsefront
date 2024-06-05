@@ -56,29 +56,38 @@ export const TopFive = () => {
   ];
 
   return (
-    <div className=" items-center justify-center bg-white p-4 pt-10 pb-20 m-10 px-10">
-      <h1 className=" text-4xl font-bold mb-10">Top 5 of the Week</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className=" items-start md:items-center justify-center bg-white p-4 pt-10 pb-20 m-10 px-0 md:px-10">
+      <h1 className=" text-lg md:text-4xl font-bold mb-0 md:mb-10">
+        Top 5 of the Week
+      </h1>
+      <div className="grid grid-cols-3  md:grid-cols-5 gap-4">
         {movieData.map((movie) => (
           <div key={movie.id} className="relative mr-5">
-            <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
-              <Image
-                src={movie.img}
-                alt={movie.title}
-                layout="responsive"
-                width={150}
-                height={180}
-                objectFit="cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-center p-2">
-                {movie.title}
+            <div className="hidden md:block">
+              <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
+                <Image
+                  src={movie.img}
+                  alt={movie.title}
+                  layout="responsive"
+                  width={150}
+                  height={180}
+                  objectFit="cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-center p-2">
+                  {movie.title}
+                </div>
               </div>
-              <div className="absolute bottom-0 -m-10 left-0 text-white text-9xl font-bold p-4">
+              <div className="absolute bottom-0 -m-10 -left-2  text-gray-100 text-5xl md:text-9xl font-extrabold p-4">
                 {movie.id}
               </div>
             </div>
           </div>
         ))}
+        <div className="flex md:hidden">
+          <div className="w-2/3 bg-gray-700 h-20"></div>
+          <div className="w-2/3 bg-gray-700 h-20"></div>
+          <div className="w-2/3 bg-gray-700 h-20"></div>
+        </div>
       </div>
     </div>
   );
