@@ -177,7 +177,8 @@ const Movies = () => {
                     alt={item.title}
                     width={200}
                     height={280}
-                    className="w-full h-30 md:72 object-cover rounded-lg"
+                    className="w-full h-30 md:72 rounded-lg"
+                    style={{ objectFit: "cover" }}
                     loading="lazy"
                   />
                   <p className="text-sm mt-2">

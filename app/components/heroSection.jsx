@@ -80,8 +80,8 @@ export default function HeroSection() {
     },
   ];
   return (
-    <div className=" mt-2">
-      <div className=" mx-auto py-8 md:py-16 ">
+    <div className=" mt-2 font-poppins">
+      <div className=" mx-auto pt-12 ">
         <div
           className="grid grid-cols-2 overflow-hidden"
           style={{ height: "90vh !important" }}
@@ -92,14 +92,14 @@ export default function HeroSection() {
           >
             <div className="px-10">
               <div className="m-10 px-10">
-                <h1 className="text-3xl md:text-4xl font-bold leading-snug mb-4">
+                <h1 className="text-sm md:text-4xl w-full font-bold leading-snug mb-4">
                   Looking for Your Next Favorite Movie?
                 </h1>
-                <p className="text-lg md:text-xl leading-relaxed mb-6">
+                <p className="text-xs md:text-xl leading-relaxed mb-6">
                   Effortlessly book movie seats from hundreds of theaters. Your
                   perfect cinema experience is just a few clicks away!
                 </p>
-                <button className="bg-purple-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-purple-700 transition duration-300 ease-in-out">
+                <button className="bg-purple-600 text-white px-6 py-3 rounded-lg text-sm md:text-lg hover:bg-purple-700 transition duration-300 ease-in-out">
                   Book Now
                 </button>
               </div>

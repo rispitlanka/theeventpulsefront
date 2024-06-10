@@ -26,18 +26,18 @@ function LogIn() {
               Sign in for a seamless booking experience and Manage reservations
             </p>
             <form>
-              <div class="mb-8 relative">
+              <div className="mb-8 relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="black"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="absolute  inset-y-0 left-3 mt-1.5 w-6 h-6 text-white pointer-events-none"
+                  className="absolute  inset-y-0 left-3 mt-1.5 w-6 h-6 text-white pointer-events-none"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
                   />
                 </svg>
@@ -45,29 +45,29 @@ function LogIn() {
                   type="text"
                   id="username"
                   placeholder="Example@gmail.com"
-                  class="shadow appearance-none border rounded w-full py-2 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
               </div>
 
-              <div class="mb-10 relative">
+              <div className="mb-10 relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="currentColor"
-                  class="absolute inset-y-0 left-3 w-7 h-7 pt-1.5 text-gray-700 pointer-events-none"
+                  className="absolute inset-y-0 left-3 w-7 h-7 pt-1.5 text-gray-700 pointer-events-none"
                 >
                   <path
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
-                    clip-rule="evenodd"
+                    clipRule="evenodd"
                   />
                 </svg>
                 <input
                   type="password"
                   id="password"
                   placeholder="At least 8 characters password"
-                  class="shadow appearance-none border rounded w-full py-2 pl-10 pr-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                  className="shadow appearance-none border rounded w-full py-2 pl-10 pr-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
                   required
                 />
               </div>

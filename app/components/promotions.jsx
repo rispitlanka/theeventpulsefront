@@ -43,7 +43,7 @@ export const Promotions = () => {
         <div className="flex justify-between mb-6 px-2">
           <div>
             <h2 className=" text-sm md:text-3xl font-bold text-white p-2">
-              Promotions You don't want to miss
+              Promotions You don&apos;t want to miss
             </h2>
           </div>
           <div className="mr-0 md:mr-10 ">
@@ -65,7 +65,8 @@ export const Promotions = () => {
                   alt={item.name}
                   width={200}
                   height={200}
-                  className="rounded-lg object-cover"
+                  className="rounded-lg "
+                  style={{ objectFit: "cover" }}
                 />
               </div>
 

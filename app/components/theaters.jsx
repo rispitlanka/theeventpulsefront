@@ -35,14 +35,14 @@ const Theaters = () => {
           </svg>
         </button>
         <div className="flex space-x-4 overflow-hidden">
-          <div className="relative w-40 flex-shrink-0">
+          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
+            {" "}
+            {/* Adjusted width and height */}
             <Image
               src={img}
               alt="Raja theater"
-              width={50}
-              height={50}
-              layout="responsive"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="rounded shadow-lg"
             />
             <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
@@ -50,14 +50,12 @@ const Theaters = () => {
               <p className="text-gray-300">Jaffna</p>
             </div>
           </div>
-          <div className="relative w-40 flex-shrink-0">
+          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
             <Image
               src={img}
               alt="Raja theater"
-              width={50}
-              height={50}
-              layout="responsive"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="rounded shadow-lg"
             />
             <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
@@ -65,14 +63,12 @@ const Theaters = () => {
               <p className="text-gray-300">Jaffna</p>
             </div>
           </div>
-          <div className="relative w-40 flex-shrink-0">
+          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
             <Image
               src={img}
               alt="Raja theater"
-              width={50}
-              height={50}
-              layout="responsive"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="rounded shadow-lg"
             />
             <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
@@ -80,14 +76,12 @@ const Theaters = () => {
               <p className="text-gray-300">Jaffna</p>
             </div>
           </div>
-          <div className="relative w-40 flex-shrink-0">
+          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
             <Image
               src={img}
               alt="Raja theater"
-              width={50}
-              height={50}
-              layout="responsive"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="rounded shadow-lg"
             />
             <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-center rounded-b-lg">

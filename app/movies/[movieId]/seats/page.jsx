@@ -63,8 +63,8 @@ function Seats() {
                   <Image
                     src={img}
                     alt="Movie Poster"
-                    className="rounded-lg object-cover"
-                    layout="responsive"
+                    className="rounded-lg "
+                    style={{ objectFit: "cover" }}
                     width={300}
                     height={150}
                   />

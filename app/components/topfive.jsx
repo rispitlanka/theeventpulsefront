@@ -64,14 +64,12 @@ export const TopFive = () => {
         {movieData.map((movie) => (
           <div key={movie.id} className="relative mr-5">
             <div className="hidden md:block">
-              <div className="relative bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className="relative bg-white  rounded-lg shadow-lg overflow-hidden">
                 <Image
                   src={movie.img}
                   alt={movie.title}
-                  layout="responsive"
-                  width={150}
-                  height={180}
-                  objectFit="cover"
+                  className="w-full h-full"
+                  style={{ objectFit: "cover" }}
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-center p-2">
                   {movie.title}

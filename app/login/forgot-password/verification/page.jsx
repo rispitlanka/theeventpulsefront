@@ -61,8 +61,8 @@ function Verification() {
         <div className="w-full max-w-md lg:w-1/3 lg:container mx-auto text-center">
           <h2 className="text-2xl font-bold mb-6">Verification Code</h2>
           <p className="text-gray-600 mx-4 mb-10">
-            Enter the verification code sent to your email. Didn't receive a
-            code? Resend.
+            Enter the verification code sent to your email. Didn&apos;t receive
+            a code? Resend.
           </p>
           <form>
             <div className="flex justify-center mb-10 space-x-2 sm:space-x-4">
@@ -96,7 +96,7 @@ function Verification() {
             </button>
           </form>
           <p className="mt-4 text-sm text-gray-600">
-            If you didn't get OTP?{" "}
+            If you didn&apos;t get OTP?{" "}
             <button
               className={`text-purple-500 ${
                 timer > 0 ? "cursor-not-allowed" : ""
