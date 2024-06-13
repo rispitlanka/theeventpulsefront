@@ -66,14 +66,14 @@ function Success() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 ">
-                  <p className=" text-gray-600 pb-2">Stall Seats</p>
-                  <p className=" font-bold pb-4">A1 B1 C1</p>
-                  <p className=" text-gray-600 pb-2"> Balcony Seats</p>
-                  <p className=" font-bold pb-4">A1 B1 C1</p>
-                  <p className=" text-gray-600 pb-2">Person info: </p>
-                  <p className=" font-bold pb-4">3 Adult, 1 Child</p>
-                  <p className=" text-gray-600 pb-2"> Booking Fees 250.00 </p>
+                <div className=" ">
+                  <p className=" text-gray-600 pb-1">Stall Seats</p>
+                  <p className=" font-bold pb-3">A1 B1 C1</p>
+                  <p className=" text-gray-600 pb-1"> Balcony Seats</p>
+                  <p className=" font-bold pb-3">A1 B1 C1</p>
+                  <p className=" text-gray-600 pb-1">Person info: </p>
+                  <p className=" font-bold pb-3">3 Adult, 1 Child</p>
+                  <p className=" text-gray-600 pb-1"> Booking Fees 250.00 </p>
                   <div className="flex justify-between">
                     <p className=" font-bold pb-4"> Total </p>
                     <p className=" font-bold pb-4"> 3000.00 </p>
@@ -85,7 +85,8 @@ function Success() {
                 <div className="h-14 w-14 -m-7 bg-gray-100  rounded-full"></div>
               </div>
               <div className="h-14 w-14 -m-7 bg-gray-100 rounded-full self-end mt-10"></div>
-              <div className="md:w-1/3 mt-6  px-6 md:mt-0 flex flex-col  justify-start items-center">
+
+              <div className="md:w-1/3 mt-6  p-6 md:mt-0 flex flex-col  justify-start items-center">
                 <div>
                   <h2 className="text-2xl  pb-6 text-center font-bold">
                     My ticket
