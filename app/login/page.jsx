@@ -19,14 +19,16 @@ function LogIn() {
         </div>
 
         {/* Right section with login form */}
-        <div className="flex flex-col lg:w-1/2 items-center justify-center bg-gray-100 p-8">
-          <div className="w-full max-w-md">
-            <h2 className="text-3xl font-bold mb-6 ">Login</h2>
-            <p className="text-left text-lg  mb-6">
+        <div className="flex flex-col lg:w-1/2 items-center justify-start  mt-4 md:mt-10 bg-gray-100  p-8">
+          <div className="w-full max-w-md mb-15   md:mb-0">
+            <h2 className=" text-lg lg:text-3xl font-bold  mb-3 md:mb-6 ">
+              Login
+            </h2>
+            <p className="text-left text-sm md:text-lg  mb-6">
               Sign in for a seamless booking experience and Manage reservations
             </p>
             <form>
-              <div className="mb-8 relative">
+              <div className="mb-3 md:mb-8 relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="black"
@@ -50,7 +52,7 @@ function LogIn() {
                 />
               </div>
 
-              <div className="mb-10 relative">
+              <div className="mb-0 md:mb-5 relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -74,7 +76,7 @@ function LogIn() {
 
               <button
                 type="submit"
-                className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg w-full mb-4"
+                className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-1.5 px-4 rounded-lg w-full mb-2 md:mb-4"
               >
                 Login
               </button>

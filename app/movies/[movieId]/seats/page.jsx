@@ -2,6 +2,7 @@ import React from "react";
 import img from "../../../../public/assets/images/indian2.png";
 import Image from "next/image";
 import Navbar from "@/app/components/navBar";
+import Link from "next/link";
 
 function Seats() {
   return (
@@ -121,9 +122,11 @@ function Seats() {
               <button className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-4">
-                Confirm
-              </button>
+              <Link href={`/movies/id/seats/payment`} passHref>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-4">
+                  Confirm
+                </button>
+              </Link>
             </div>
           </div>
         </div>

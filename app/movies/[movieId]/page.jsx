@@ -267,7 +267,7 @@ function Movie() {
                     className={`flex flex-col items-center justify-center w-20 h-20  rounded-lg ${
                       date.isSelected
                         ? "bg-red-600 text-white"
-                        : "border border-gray-300 text-gray-600"
+                        : "border border-gray-600  text-gray-600"
                     }`}
                   >
                     <span className="text-sm">{date.date}</span>
@@ -345,7 +345,7 @@ function Movie() {
                       "REGAL 3D",
                       "2D",
                     ].map((type, index) => (
-                      <div key={index} className="bg-gray-100 p-4 rounded-lg">
+                      <div key={index} className=" p-4 rounded-lg">
                         <div className="flex justify-between">
                           <h4 className="font-semibold">{type}</h4>
                           <p className="mt-2">
@@ -369,7 +369,7 @@ function Movie() {
                               className={`py-1 px-2 rounded ${
                                 idx === 1
                                   ? "bg-red-500 text-white"
-                                  : "bg-gray-300 text-gray-800"
+                                  : "bg-gray-200 text-gray-800"
                               }`}
                             >
                               {time}
@@ -388,7 +388,7 @@ function Movie() {
                   className="w-32 h-auto rounded-lg"
                 />
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-md mt-6 flex items-center">
+              <div className="bg-gray-200 p-6 rounded-lg shadow-md mt-6 flex items-center">
                 <div className="flex-grow">
                   <h2 className="text-xl font-semibold mb-4">
                     Your Selections
