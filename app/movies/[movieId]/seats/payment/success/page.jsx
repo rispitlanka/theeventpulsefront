@@ -15,8 +15,8 @@ function Success() {
                 className="w-full h-full object-cover rounded-lg"
               />
             </div>
-            <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg px-6 flex flex-col md:flex-row">
-              <div className="md:w-2/3 border-r border-dashed py-6 pr-8 border-gray-400 ">
+            <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg pl-3 flex flex-col md:flex-row">
+              <div className="md:w-2/3 border-r-4 border-dashed  py-6 pr-8 border-gray-300 ">
                 <div className=" ">
                   <h2 className="text-2xl w-3/4   pb-4 pt-3  font-bold">
                     The Ministry of Ungentlemanly Warfare
@@ -30,7 +30,7 @@ function Success() {
                     </p>
 
                     <div className="flex space-x-10 justify-between">
-                      <div className="pb-4 flex space-x-4">
+                      <div className="pb-4 flex space-x-2.5">
                         <div>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -86,9 +86,9 @@ function Success() {
               </div>
               <div className="h-14 w-14 -m-7 bg-gray-100 rounded-full self-end mt-10"></div>
 
-              <div className="md:w-1/3 mt-6  p-6 md:mt-0 flex flex-col  justify-start items-center">
+              <div className="md:w-1/3 mt-6   md:mt-0 flex flex-col  justify-start items-center">
                 <div>
-                  <h2 className="text-2xl  pb-6 text-center font-bold">
+                  <h2 className="text-2xl pt-9 pb-6 text-center font-bold">
                     My ticket
                   </h2>
                 </div>
@@ -96,16 +96,16 @@ function Success() {
                   <img
                     src="/qr.png" // Update the path to your QR code image
                     alt="QR Code"
-                    className="w-32 h-32 object-cover"
+                    className="w-40 h-40 object-cover"
                   />
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600  px-4 mb-8">
+                  <p className=" px-10 mb-7">
                     You can start enjoying the movie by scanning your ticket to
                     the theater and canteen staff.
                   </p>
                 </div>
-                <button className="mt-6 border   mx-auto flex border-black  px-6 py-2 rounded-lg">
+                <button className=" border   mx-auto flex border-black  px-6 py-2 rounded-lg">
                   <span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

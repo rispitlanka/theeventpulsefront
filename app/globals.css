@@ -8,3 +8,7 @@
 body {
     font-family: 'Poppins', sans-serif;
   }
+
+  .filter-green {
+    filter: hue-rotate(90deg); /* Adjust this value to achieve the desired green color */
+  }
