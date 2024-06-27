@@ -1,13 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import img from "../../../public/assets/images/indian2.png";
+import img from "../../../public/Picture.svg";
 import movie1 from "../../../public/assets/images/indian2.png";
 import movie2 from "../../../public/assets/images/movie9.png";
 import movie3 from "../../../public/assets/images/movie10.png";
 import movie4 from "../../../public/assets/images/maharaja.png";
 import movie5 from "../../../public/assets/images/movie5.png";
-import sel from "../../../public/assets/images/selection.png";
 
 function Movie() {
   const dates = [
@@ -125,7 +124,7 @@ function Movie() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left section */}
             <div className="lg:col-span-1">
-              <div className="pl-0">
+              <div className="pl-0  ">
                 <Image
                   src={img}
                   alt="Movie Poster"
@@ -364,16 +363,18 @@ function Movie() {
                             "16:00",
                             "19:00",
                           ].map((time, idx) => (
-                            <span
-                              key={idx}
-                              className={`py-1 px-2 rounded ${
-                                idx === 1
-                                  ? "bg-red-500 text-white"
-                                  : "bg-gray-200 text-gray-800"
-                              }`}
-                            >
-                              {time}
-                            </span>
+                            <Link key={idx} href={`/movies/id/seats/`} passHref>
+                              <span
+                                key={idx}
+                                className={`py-1 px-2 rounded ${
+                                  idx === 1
+                                    ? "bg-red-500 text-white"
+                                    : "bg-gray-200 text-gray-800"
+                                }`}
+                              >
+                                {time}
+                              </span>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -381,14 +382,8 @@ function Movie() {
                   </div>
                 </div>
               </div>
-              <div className="ml-4">
-                <img
-                  src={sel}
-                  alt="Cinema items"
-                  className="w-32 h-auto rounded-lg"
-                />
-              </div>
-              <div className="bg-gray-200 p-6 rounded-lg shadow-md mt-6 flex items-center">
+
+              {/* <div className="bg-gray-200 p-6 rounded-lg shadow-md mt-6 flex items-center">
                 <div className="flex-grow">
                   <h2 className="text-xl font-semibold mb-4">
                     Your Selections
@@ -432,7 +427,7 @@ function Movie() {
               </div>
               <p className="text-center text-xs mt-2 text-gray-500">
                 * Seat selection can be done after this
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
@@ -442,16 +437,11 @@ function Movie() {
           Related movies
         </h2>
         <div className="grid grid-cols-3  md:grid-cols-5 gap-4">
-          {movieData.map((movie) => (
-            <div key={movie.id} className="relative mr-5">
-              <div className="hidden md:block">
-                <div className="relative bg-white w-150 h-180 rounded-lg shadow-lg overflow-hidden">
-                  <Image
-                    src={movie.img}
-                    alt={movie.title}
-                    fill
-                    style={{ objectFit: "cover" }}
-                  />
+          {movieData.map((movie, index) => (
+            <div key={index} className="relative mr-5">
+              <div className="">
+                <div className="relative bg-white w-150 h-180 rounded-lg shadow-lg ">
+                  <Image src={movie.img} alt={movie.title} fill />
                 </div>
               </div>
             </div>

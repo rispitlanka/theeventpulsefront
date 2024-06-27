@@ -5,8 +5,28 @@ function Success() {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
-      <div className="bg-gray-100 pt-5">
+      <div className="bg-gray-100 ">
         <div className="container pt-20 w-full mx-auto py-4">
+          {/* Booking Confirmation Message */}
+          <div className="container mx-auto text-center  py-4">
+            <div className="flex items-center justify-center space-x-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+                className="h-6 w-6 text-green-600"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm-1 14.586L6.293 12.88l1.414-1.414L11 13.757l5.293-5.293l1.414 1.414Z"
+                ></path>
+              </svg>
+              <h2 className="text-xl font-semibold ">
+                Your booking is confirmed!
+              </h2>
+            </div>
+          </div>
           <div className="p-6 md:flex">
             <div className="md:w-1/3 px-4">
               <img
