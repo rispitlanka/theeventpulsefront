@@ -1,0 +1,6 @@
+.seat-icon:hover path,
+.seat-icon:hover rect,
+.seat-icon:hover svg {
+  fill: #1cce83 !important;
+  /* The color you want on hover */
+}
