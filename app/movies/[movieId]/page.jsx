@@ -4,7 +4,7 @@ import React from "react";
 import img from "../../../public/Picture.svg";
 import movie1 from "../../../public/assets/images/indian2.png";
 import movie2 from "../../../public/assets/images/movie9.png";
-import movie3 from "../../../public/assets/images/movie10.png";
+import movie3 from "../../../public/assets/images/indian2.png";
 import movie4 from "../../../public/assets/images/maharaja.png";
 import movie5 from "../../../public/assets/images/movie5.png";
 
@@ -21,7 +21,7 @@ function Movie() {
   const movieData = [
     {
       id: 1,
-      img: movie1,
+      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
       title: "Indian 2",
       genres: "Action",
       year: "2024",
@@ -30,7 +30,7 @@ function Movie() {
     },
     {
       id: 2,
-      img: movie2,
+      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
       title: "Indian 2",
       genres: "Action",
       year: "2024",
@@ -39,7 +39,7 @@ function Movie() {
     },
     {
       id: 3,
-      img: movie3,
+      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
       title: "Indian 2",
       genres: "Action",
       year: "2024",
@@ -48,7 +48,7 @@ function Movie() {
     },
     {
       id: 4,
-      img: movie4,
+      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
       title: "Indian 2",
       genres: "Action",
       year: "2024",
@@ -57,13 +57,26 @@ function Movie() {
     },
     {
       id: 5,
-      img: movie5,
+      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
       title: "Indian 2",
       genres: "Action",
       year: "2024",
       duration: "1h 52min",
       languages: "Tamil",
     },
+  ];
+  const genreData = [
+    "Action",
+    "Comedy",
+    "Horror",
+    "Musical",
+    "Fantasy",
+    "Romance",
+    "Thriller",
+    "Mystery",
+    "Documentary",
+    "Musical",
+    "Science Fiction",
   ];
 
   return (
@@ -120,74 +133,48 @@ function Movie() {
       </header>
 
       <main className="pt-20">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="container mx-auto  px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* Left section */}
             <div className="lg:col-span-1">
               <div className="pl-0  ">
                 <Image
                   src={img}
                   alt="Movie Poster"
-                  className=" w-full h-30 md:30  rounded-lg"
-                  style={{ objectFit: "cover" }}
+                  className=" w-full h-1/4 md:1/4  rounded-lg"
+                  style={{ objectFit: "fill" }}
+                  loading="lazy"
                 />
               </div>
-              <div className="">
-                <button className=" flex mt-4  bg-gray-200 text-right text-black  py-2 px-2   ml-14  rounded-3xl w-1/2">
-                  <div className="px-5">
+              <div className="relative justify-center mt-4 w-full">
+                <button className="flex  items-center justify-center bg-gray-300  text-black py-2 px-2 rounded-3xl w-full md:w-full">
+                  <div className="pr-3  ">
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
+                      width="28"
+                      height="28"
+                      viewBox="0 0 28 28"
                       fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      className="size-6 bg-blue-600 text-white rounded-2xl "
+                      xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z"
+                        d="M11.2 20.3V7.7L19.6 14M14 0C12.1615 0 10.341 0.362121 8.64243 1.06569C6.94387 1.76925 5.40052 2.80048 4.1005 4.1005C1.475 6.72601 0 10.287 0 14C0 17.713 1.475 21.274 4.1005 23.8995C5.40052 25.1995 6.94387 26.2307 8.64243 26.9343C10.341 27.6379 12.1615 28 14 28C17.713 28 21.274 26.525 23.8995 23.8995C26.525 21.274 28 17.713 28 14C28 12.1615 27.6379 10.341 26.9343 8.64243C26.2307 6.94387 25.1995 5.40052 23.8995 4.1005C22.5995 2.80048 21.0561 1.76925 19.3576 1.06569C17.659 0.362121 15.8385 0 14 0Z"
+                        fill="#2349F7"
                       />
                     </svg>
                   </div>
                   Watch Trailer
                 </button>
               </div>
-              <h1 className="text-2xl font-bold mt-4">
+              <h1 className="text-2xl font-bold py-3 mt-4">
                 The Ministry of Ungentlemanly Warfare
               </h1>
               <div className="flex items-center space-x-2 mt-2">
-                <span className="bg-blue-200 text-blue-800 text-sm font-semibold px-2.5 py-0.5 rounded">
+                <span className="bg-blue-600 text-rose-200 mr-4 text-sm font-semibold px-4 py-1.5 rounded">
                   ENGLISH
                 </span>
-                <span className="text-sm">1h 44m</span>
-              </div>
-              <div className="flex flex-wrap mt-4">
-                {[
-                  "Action",
-                  "Comedy",
-                  "Horror",
-                  "Musical",
-                  "Fantasy",
-                  "Romance",
-                  "Thriller",
-                  "Mystery",
-                  "Documentary",
-                  "Musical",
-                  "Science Fiction",
-                ].map((genre) => (
-                  <span
-                    key={genre}
-                    className="bg-gray-200 text-gray-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded"
-                  >
-                    {genre}
-                  </span>
-                ))}
+                <span className=" border border-neutral-400 ml-4 px-4 py-1.5 bg-white text-black rounded text-sm">
+                  1h 44m
+                </span>
               </div>
               <p className="text-sm mt-4">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
@@ -196,6 +183,17 @@ function Movie() {
                 sem sed elit malesuada volutpat. Curabitur ultricies libero ac
                 nibh tincidunt, non facilisis tortor cursus.
               </p>
+              <div className="flex flex-wrap mt-4">
+                {genreData.map((genre, index) => (
+                  <span
+                    key={index}
+                    className="bg-gray-200 text-gray-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+
               <h2 className="text-xl font-semibold mt-4 mb-4">
                 Role in the Film
               </h2>
@@ -242,7 +240,7 @@ function Movie() {
             </div>
 
             {/* Right section */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <div className="flex items-center space-x-4 pb-5">
                 <button className="p-2 rounded-full hover:bg-gray-200 focus:outline-none">
                   <svg
@@ -437,15 +435,20 @@ function Movie() {
           Related movies
         </h2>
         <div className="grid grid-cols-3  md:grid-cols-5 gap-4">
-          {movieData.map((movie, index) => (
-            <div key={index} className="relative mr-5">
-              <div className="">
-                <div className="relative bg-white w-150 h-180 rounded-lg shadow-lg ">
-                  <Image src={movie.img} alt={movie.title} fill />
+          {movieData &&
+            movieData.map((movie) => (
+              <div key={movie.id} className="  flex mr-5">
+                <div className="relative bg-white mb-6 w-150 h-180  shadow-lg ">
+                  <img
+                    src={movie.img}
+                    alt={movie.title}
+                    fill="true"
+                    style={{ objectFit: "cover" }}
+                    className="rounded-lg"
+                  />
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
     </div>
