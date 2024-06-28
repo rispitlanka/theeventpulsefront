@@ -131,9 +131,9 @@ function Payment() {
           </div>
           <div className="w-1/3 h-[80vh] ">
             <img
-              src="/indian2.png" // Replace with the correct path to the image
+              src="/Paymentpic.svg" // Replace with the correct path to the image
               alt="Movie Poster"
-              className="rounded-lg shadow-md w-full  object-cover"
+              className="rounded-lg  w-full mt-6  object-cover"
             />
           </div>
         </div>
