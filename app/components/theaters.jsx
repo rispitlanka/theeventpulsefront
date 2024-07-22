@@ -1,9 +1,32 @@
+"use client";
+import { useState, useEffect } from "react";
 import React from "react";
 import Image from "next/image";
 import theater from "../../public/assets/images/raja_theater.png";
+import { supabase } from "../supabaseClient";
 
 const Theaters = () => {
-  const img = theater;
+  const [theatres, setTheatres] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTheatres = async () => {
+      setIsLoading(true);
+      let { data, error } = await supabase
+        .from("theatres") // Replace 'movies' with your actual table name
+        .select("*");
+
+      console.log(data);
+
+      if (error) console.error("Error fetching data:", error);
+      setTheatres(data);
+
+      setIsLoading(false);
+    };
+
+    fetchTheatres();
+  }, []);
+
   return (
     <div className="flex flex-col md:flex-row items-center justify-between bg-white py-12 px-4 md:px-8">
       <div className="text-center md:text-left md:w-1/2">
@@ -35,60 +58,24 @@ const Theaters = () => {
           </svg>
         </button>
         <div className="flex space-x-4 overflow-hidden">
-          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
-            {" "}
-            {/* Adjusted width and height */}
-            <Image
-              src={img}
-              alt="Raja theater"
-              fill
-              style={{ objectFit: "cover" }}
-              className="rounded shadow-lg"
-            />
-            <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
-              <p className="font-semibold">Raja theater</p>
-              <p className="text-gray-300">Jaffna</p>
+          {theatres.slice(0, 3).map((theatre) => (
+            <div
+              key={theatre.id}
+              className="relative w-64 h-64 flex-shrink-0 bg-gray-200"
+            >
+              <Image
+                src={theatre.theatreImage}
+                alt={theatre.name}
+                fill
+                style={{ objectFit: "cover" }}
+                className="rounded shadow-lg"
+              />
+              <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
+                <p className="font-semibold">{theatre.name}</p>
+                <p className="text-gray-300">{theatre.city}</p>
+              </div>
             </div>
-          </div>
-          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
-            <Image
-              src={img}
-              alt="Raja theater"
-              fill
-              style={{ objectFit: "cover" }}
-              className="rounded shadow-lg"
-            />
-            <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
-              <p className="font-semibold">Raja theater</p>
-              <p className="text-gray-300">Jaffna</p>
-            </div>
-          </div>
-          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
-            <Image
-              src={img}
-              alt="Raja theater"
-              fill
-              style={{ objectFit: "cover" }}
-              className="rounded shadow-lg"
-            />
-            <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
-              <p className="font-semibold">Raja theater</p>
-              <p className="text-gray-300">Jaffna</p>
-            </div>
-          </div>
-          <div className="relative w-64 h-64 flex-shrink-0 bg-gray-200">
-            <Image
-              src={img}
-              alt="Raja theater"
-              fill
-              style={{ objectFit: "cover" }}
-              className="rounded shadow-lg"
-            />
-            <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-center rounded-b-lg">
-              <p className="font-semibold">Raja theater</p>
-              <p className="text-gray-300">Jaffna</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

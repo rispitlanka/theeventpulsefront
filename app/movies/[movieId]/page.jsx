@@ -1,83 +1,254 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { supabase } from "./../../supabaseClient";
 import img from "../../../public/Picture.svg";
-import movie1 from "../../../public/assets/images/indian2.png";
-import movie2 from "../../../public/assets/images/movie9.png";
-import movie3 from "../../../public/assets/images/indian2.png";
-import movie4 from "../../../public/assets/images/maharaja.png";
-import movie5 from "../../../public/assets/images/movie5.png";
 
 function Movie() {
-  const dates = [
-    { day: "THU", date: "15 Jan" },
-    { day: "FRI", date: "16 Jan", isSelected: true },
-    { day: "SAT", date: "17 Jan" },
-    { day: "SUN", date: "18 Jan" },
-    { day: "MON", date: "19 Jan" },
-    { day: "TUE", date: "20 Jan" },
-    { day: "WED", date: "21 Jan" },
+  const { movieId } = useParams();
+  const [movieData, setMovieData] = useState([]);
+  const [relatedMovies, setRelatedMovies] = useState([]);
+  const [movieGenres, setMovieGenres] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [shows, setShows] = useState([]);
+  const [showTimes, setShowTimes] = useState([]);
+  const [theatres, setTheatres] = useState([]);
+  const [screens, setScreens] = useState([]);
+
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
-  const movieData = [
-    {
-      id: 1,
-      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
-      title: "Indian 2",
-      genres: "Action",
-      year: "2024",
-      duration: "1h 52min",
-      languages: "Tamil",
-    },
-    {
-      id: 2,
-      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
-      title: "Indian 2",
-      genres: "Action",
-      year: "2024",
-      duration: "1h 52min",
-      languages: "Tamil",
-    },
-    {
-      id: 3,
-      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
-      title: "Indian 2",
-      genres: "Action",
-      year: "2024",
-      duration: "1h 52min",
-      languages: "Tamil",
-    },
-    {
-      id: 4,
-      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
-      title: "Indian 2",
-      genres: "Action",
-      year: "2024",
-      duration: "1h 52min",
-      languages: "Tamil",
-    },
-    {
-      id: 5,
-      img: "https://th.bing.com/th/id/OIP.aLZHmROYMIlGdQ8uqmVUhwHaLk?rs=1&pid=ImgDetMain",
-      title: "Indian 2",
-      genres: "Action",
-      year: "2024",
-      duration: "1h 52min",
-      languages: "Tamil",
-    },
-  ];
-  const genreData = [
-    "Action",
-    "Comedy",
-    "Horror",
-    "Musical",
-    "Fantasy",
-    "Romance",
-    "Thriller",
-    "Mystery",
-    "Documentary",
-    "Musical",
-    "Science Fiction",
-  ];
+  const today = new Date();
+  const currentDayOfWeek = today.getDay();
+  const currentDate = today.getDate();
+  const currentMonth = today.getMonth();
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const getCurrentWeekDates = () => {
+    const currentWeekDates = [];
+    for (let i = 1; i < 8; i++) {
+      const date = new Date();
+      date.setDate(currentDate - currentDayOfWeek + i);
+      currentWeekDates.push(date);
+    }
+    return currentWeekDates;
+  };
+
+  const handleDateClick = (date) => {
+    setSelectedDate(date);
+    console.log(selectedDate);
+    fetchShows(date);
+  };
+
+  const fetchShows = async (date) => {
+    const formattedDate = formatDate(date);
+    console.log(formattedDate);
+    const { data: shows, error } = await supabase
+      .from("shows")
+      .select("*")
+      .eq("movieId", movieId)
+      .eq("date", formattedDate);
+
+    if (error) {
+      console.error("Error fetching shows:", error);
+    } else {
+      console.log(shows);
+      setShows(shows);
+      const showTimeIds = shows.map((show) => show.showTimeId);
+      const theatreIds = shows.map((show) => show.theatreId);
+      const screenIds = shows.map((show) => show.screenId);
+
+      fetchShowTimes(showTimeIds);
+      fetchTheatres(theatreIds);
+      fetchScreens(screenIds);
+    }
+  };
+
+  const fetchTheatres = async (theatreIds) => {
+    const { data: theatres, error } = await supabase
+      .from("theatres")
+      .select("*")
+      .in("id", theatreIds);
+
+    if (error) {
+      console.error("Error fetching theaters:", error);
+    } else {
+      setTheatres(theatres);
+      console.log(theatres);
+    }
+  };
+
+  const fetchScreens = async (screenIds) => {
+    const { data: screens, error } = await supabase
+      .from("theatres")
+      .select("*")
+      .in("id", screenIds);
+
+    if (error) {
+      console.error("Error fetching Screens:", error);
+    } else {
+      setScreens(screens);
+      console.log(screens);
+    }
+  };
+
+  const fetchShowTimes = async (showTimeIds) => {
+    const { data: showTimes, error } = await supabase
+      .from("showTime")
+      .select("*")
+      .in("id", showTimeIds);
+
+    if (error) {
+      console.error("Error fetching show times:", error);
+    } else {
+      setShowTimes(showTimes);
+      console.log(showTimes);
+    }
+  };
+
+  const formatShowTime = (timeString) => {
+    const [hour, minute] = timeString.split(":").map(Number);
+    return `${String(hour).padStart(2, "0")}:${String(minute).padStart(
+      2,
+      "0"
+    )}`;
+  };
+
+  useEffect(() => {
+    if (movieId) {
+      // Fetch movie data from Supabase
+      const fetchMovieData = async () => {
+        const { data: movie, error } = await supabase
+          .from("movies")
+          .select(
+            `
+            *,
+            movie_genre (*, 
+              genre_id,
+             genres (genre_name)
+            ),  movie_language (*, 
+              language_id,
+             languages (language_name)
+            )
+          `
+          )
+          .eq("id", movieId)
+          .single();
+
+        if (error) {
+          console.error("Error fetching movie data:", error);
+        } else {
+          setMovieData(movie);
+          setMovieGenres(
+            movie.movie_genre.map((genre) => genre.genres.genre_name)
+          );
+        }
+      };
+
+      fetchMovieData();
+    }
+  }, [movieId]);
+  console.log(movieData);
+
+  useEffect(() => {
+    if (movieId) {
+      // Fetch related movies data from Supabase
+      const fetchRelatedMovies = async () => {
+        const { data: movies, error } = await supabase
+          .from("movies")
+          .select("*")
+          .neq("id", movieId) // Exclude the current movie
+          .limit(5);
+
+        if (error) {
+          console.error("Error fetching related movies:", error);
+        } else {
+          setRelatedMovies(movies);
+        }
+      };
+
+      fetchRelatedMovies();
+    }
+  }, [movieId]);
+
+  const formatDuration = (duration) => {
+    if (!duration || typeof duration !== "string") {
+      return "loading";
+    }
+
+    const [hrs = 0, mins = 0] = duration.split(":").map(Number);
+    return `${hrs}hr ${mins}min`;
+  };
+
+  // Group shows by theatreId
+  const groupShowsByTheatre = () => {
+    const grouped = theatres.reduce((acc, theatre) => {
+      acc[theatre.id] = shows.filter((show) => show.theatreId === theatre.id);
+      return acc;
+    }, {});
+    return grouped;
+  };
+
+  const groupedShows = groupShowsByTheatre();
+
+  // Render grouped shows
+  const renderGroupedShows = () => {
+    return Object.keys(groupedShows).map((theatreId) => {
+      const theatre = theatres.find((theatre) => theatre.id == theatreId);
+      return (
+        <div key={theatreId} className="w-3/4">
+          <h4 className="text-lg font-semibold mt-4">
+            {theatre ? theatre.name : "loading"}
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
+            {groupedShows[theatreId].map((show) => {
+              const showTime = showTimes.find(
+                (time) => time.id === show.showTimeId
+              );
+
+              return (
+                <div className="grid grid-cols-5 gap-2 w-3/4 mt-2">
+                  <Link href={`/movies/id/seats/`} passHref>
+                    <span
+                      key={show.id}
+                      className={`py-1 px-2 rounded ${
+                        // index === 1
+                        //   ? "bg-red-500 text-white"
+                        //   :
+                        "bg-gray-200 text-gray-800"
+                      }`}
+                    >
+                      {showTime ? formatShowTime(showTime.time) : "loading"}
+                    </span>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    });
+  };
 
   return (
     <div className=" bg-gray-100">
@@ -133,21 +304,26 @@ function Movie() {
       </header>
 
       <main className="pt-20">
-        <div className="container mx-auto  px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="container mx-auto  px-2">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Left section */}
             <div className="lg:col-span-1">
               <div className="pl-0  ">
-                <Image
-                  src={img}
+                <img
+                  src={movieData.poster}
                   alt="Movie Poster"
-                  className=" w-full h-1/4 md:1/4  rounded-lg"
+                  className=" w-full h-64 md:1/4 rounded-lg"
                   style={{ objectFit: "fill" }}
                   loading="lazy"
                 />
               </div>
               <div className="relative justify-center mt-4 w-full">
-                <button className="flex  items-center justify-center bg-gray-300  text-black py-2 px-2 rounded-3xl w-full md:w-full">
+                <a
+                  href={movieData.trailer_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex  items-center justify-center bg-gray-300  text-black py-2 px-2 rounded-3xl w-full md:w-full"
+                >
                   <div className="pr-3  ">
                     <svg
                       width="28"
@@ -163,17 +339,19 @@ function Movie() {
                     </svg>
                   </div>
                   Watch Trailer
-                </button>
+                </a>
               </div>
               <h1 className="text-2xl font-bold py-3 mt-4">
-                The Ministry of Ungentlemanly Warfare
+                {movieData.title}
               </h1>
               <div className="flex items-center space-x-2 mt-2">
-                <span className="bg-blue-600 text-rose-200 mr-4 text-sm font-semibold px-4 py-1.5 rounded">
-                  ENGLISH
-                </span>
+                {movieData?.movie_language?.[0]?.languages?.language_name && (
+                  <span className="bg-blue-600 text-rose-200 mr-4 text-sm font-semibold px-4 py-1.5 rounded">
+                    {movieData.movie_language[0].languages.language_name}
+                  </span>
+                )}
                 <span className=" border border-neutral-400 ml-4 px-4 py-1.5 bg-white text-black rounded text-sm">
-                  1h 44m
+                  {formatDuration(movieData.duration)}
                 </span>
               </div>
               <p className="text-sm mt-4">
@@ -184,10 +362,10 @@ function Movie() {
                 nibh tincidunt, non facilisis tortor cursus.
               </p>
               <div className="flex flex-wrap mt-4">
-                {genreData.map((genre, index) => (
+                {movieGenres.map((genre, index) => (
                   <span
                     key={index}
-                    className="bg-gray-200 text-gray-800 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded"
+                    className="bg-white text-gray-800 shadow-lg text-xs font-semibold mr-2 px-2 py-1 rounded"
                   >
                     {genre}
                   </span>
@@ -197,7 +375,7 @@ function Movie() {
               <h2 className="text-xl font-semibold mt-4 mb-4">
                 Role in the Film
               </h2>
-              <div className="flex space-x-4 mt-2 m">
+              <div className="flex space-x-4 items-center mx-auto mt-2 m">
                 {["Actor", "Director", "Musician"].map((role) => (
                   <div key={role} className="flex flex-col items-center">
                     <div className="w-12 h-12 bg-gray-300 rounded-full mb-3"></div>
@@ -209,15 +387,13 @@ function Movie() {
                 Peripheral roles
               </h2>
               <div className="flex space-x-4 mt-2 mb-4">
-                {["Emily", "Sophia", "Liam", "Benjamin", "David", "John"].map(
-                  (role, index) => (
-                    <div key={index} className="flex flex-col items-center">
-                      <div className="w-12 h-12 bg-gray-300 rounded-lg"></div>
+                {["Emily", "Sophia", "John"].map((role, index) => (
+                  <div key={index} className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-gray-300 rounded-lg"></div>
 
-                      <span className="text-xs mt-1">{role}</span>
-                    </div>
-                  )
-                )}
+                    <span className="text-xs mt-1">{role}</span>
+                  </div>
+                ))}
                 <div className=" -pl-4 mt-4">
                   <button>
                     <svg
@@ -240,7 +416,7 @@ function Movie() {
             </div>
 
             {/* Right section */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-4">
               <div className="flex items-center space-x-4 pb-5">
                 <button className="p-2 rounded-full hover:bg-gray-200 focus:outline-none">
                   <svg
@@ -258,20 +434,23 @@ function Movie() {
                     />
                   </svg>
                 </button>
-                {dates.map((date, index) => (
-                  <div
+                {getCurrentWeekDates().map((date, index) => (
+                  <button
                     key={index}
-                    className={`flex flex-col items-center justify-center w-20 h-20  rounded-lg ${
-                      date.isSelected
+                    className={`flex flex-col items-center  justify-center w-20 h-20  rounded-lg ${
+                      date.toDateString() === selectedDate.toDateString()
                         ? "bg-red-600 text-white"
-                        : "border border-gray-600  text-gray-600"
+                        : " bg-white border border-gray-600 hover:bg-red-600 hover:text-white text-gray-600"
                     }`}
+                    onClick={() => handleDateClick(date)}
                   >
-                    <span className="text-sm">{date.date}</span>
-                    <span className="mt-1 text-lg font-semibold">
-                      {date.day}
+                    <span className="text-sm">
+                      {date.getDate()} {months[currentMonth]}
                     </span>
-                  </div>
+                    <span className="mt-1 text-lg font-semibold">
+                      {daysOfWeek[date.getDay()]}
+                    </span>
+                  </button>
                 ))}
                 <button className="p-2 rounded-full hover:bg-gray-200 focus:outline-none">
                   <svg
@@ -290,12 +469,13 @@ function Movie() {
                   </svg>
                 </button>
               </div>
-              <div className="bg-white p-6 rounded-lg ">
+
+              <div className="bg-white p-6 rounded-lg overflow-y-scroll ">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-1">
+                  <div className="flex relative items-center space-x-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-gray-500"
+                      className="absolute left-3 h-5 w-5 text-gray-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -305,11 +485,24 @@ function Movie() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    <select className="border rounded-lg px-3 py-2">
-                      <option>Jaffna</option>
-                      <option>Colombo</option>
-                      <option>Kandy</option>
-                    </select>
+                    <input
+                      type="text"
+                      className="border rounded-lg px-8 py-2 "
+                      placeholder="Search City"
+                    />
+
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-500 absolute right-3 top-2.5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12.9 14.32a8 8 0 111.414-1.414l5.386 5.387a1 1 0 01-1.414 1.414l-5.386-5.387zM8 14A6 6 0 108 2a6 6 0 000 12z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </div>
                   <div className="relative  border-black">
                     <input
@@ -332,53 +525,7 @@ function Movie() {
                   </div>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">REGAL</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    {[
-                      "SILVER 2D",
-                      "GOLD 2D",
-                      "PLATINUM 2D",
-                      "REGAL 3D",
-                      "2D",
-                    ].map((type, index) => (
-                      <div key={index} className=" p-4 rounded-lg">
-                        <div className="flex justify-between">
-                          <h4 className="font-semibold">{type}</h4>
-                          <p className="mt-2">
-                            Rs. {index % 2 === 0 ? "800.00" : "1000.00"}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-5 gap-5 w-1/2 mt-2">
-                          {[
-                            "05:00",
-                            "05:30",
-                            "05:45",
-                            "06:15",
-                            "06:45",
-                            "13:00",
-                            "16:00",
-                            "19:00",
-                          ].map((time, idx) => (
-                            <Link key={idx} href={`/movies/id/seats/`} passHref>
-                              <span
-                                key={idx}
-                                className={`py-1 px-2 rounded ${
-                                  idx === 1
-                                    ? "bg-red-500 text-white"
-                                    : "bg-gray-200 text-gray-800"
-                                }`}
-                              >
-                                {time}
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <div>{renderGroupedShows()}</div>
               </div>
 
               {/* <div className="bg-gray-200 p-6 rounded-lg shadow-md mt-6 flex items-center">
@@ -430,17 +577,17 @@ function Movie() {
           </div>
         </div>
       </main>
-      <div className="container mx-auto">
-        <h2 className=" text-xl md:text-2xl font-bold mb-0 md:mb-4">
+      <div className="container mt-5 mx-auto">
+        <h2 className=" text-xl md:text-2xl font-bold mb-0 md:mb-6">
           Related movies
         </h2>
         <div className="grid grid-cols-3  md:grid-cols-5 gap-4">
-          {movieData &&
-            movieData.map((movie) => (
+          {relatedMovies &&
+            relatedMovies.map((movie) => (
               <div key={movie.id} className="  flex mr-5">
                 <div className="relative bg-white mb-6 w-150 h-180  shadow-lg ">
                   <img
-                    src={movie.img}
+                    src={movie.poster}
                     alt={movie.title}
                     fill="true"
                     style={{ objectFit: "cover" }}

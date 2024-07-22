@@ -6,14 +6,15 @@ import Link from "next/link";
 import "../seats/seatstyle.css";
 
 const Seats = () => {
-  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedStallSeats, setSelectedStallSeats] = useState([]);
+  const [selectedBalconySeats, setSelectedBalconySeats] = useState([]);
   const [seatHovered, setSeatHovered] = useState({});
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleMouseEnter = (section, side, rowIndex, seatIndex) => {
-    const seatKey = side
-      ? `${section}-${side}-${rowIndex}-${seatIndex}`
-      : `${section}-${rowIndex}-${seatIndex}`;
+    const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
+      65 + rowIndex
+    )}${side === "right" ? seatIndex + 14 : seatIndex + 1}`;
     setSeatHovered((prev) => ({
       ...prev,
       [seatKey]: true,
@@ -21,9 +22,9 @@ const Seats = () => {
   };
 
   const handleMouseLeave = (section, side, rowIndex, seatIndex) => {
-    const seatKey = side
-      ? `${section}-${side}-${rowIndex}-${seatIndex}`
-      : `${section}-${rowIndex}-${seatIndex}`;
+    const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
+      65 + rowIndex
+    )}${side === "right" ? seatIndex + 14 : seatIndex + 1}`;
     setSeatHovered((prev) => ({
       ...prev,
       [seatKey]: false,
@@ -54,14 +55,23 @@ const Seats = () => {
   };
 
   const handleSeatClick = (section, side, rowIndex, seatIndex) => {
-    const seatKey = side
-      ? `${section}-${side}-${rowIndex}-${seatIndex}`
-      : `${section}-${rowIndex}-${seatIndex}`;
-    setSelectedSeats((prev) =>
-      prev.includes(seatKey)
-        ? prev.filter((s) => s !== seatKey)
-        : [...prev, seatKey]
-    );
+    const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
+      65 + rowIndex
+    )}${side === "right" ? seatIndex + 14 : seatIndex + 1}`;
+
+    if (section === "stalls") {
+      setSelectedStallSeats((prev) =>
+        prev.includes(seatKey)
+          ? prev.filter((s) => s !== seatKey)
+          : [...prev, seatKey]
+      );
+    } else if (section === "balcony") {
+      setSelectedBalconySeats((prev) =>
+        prev.includes(seatKey)
+          ? prev.filter((s) => s !== seatKey)
+          : [...prev, seatKey]
+      );
+    }
   };
 
   const toggleDropdown = () => {
@@ -77,10 +87,14 @@ const Seats = () => {
           </div>
         )}
         {row.map((seat, seatIndex) => {
-          const seatKey = side
-            ? `${section}-${side}-${rowIndex}-${seatIndex}`
-            : `${section}-${rowIndex}-${seatIndex}`;
-          const isSelected = selectedSeats.includes(seatKey);
+          const seatKey = `${section}-${
+            side ? `${side}-` : ""
+          }${String.fromCharCode(65 + rowIndex)}${
+            side === "right" ? seatIndex + 14 : seatIndex + 1
+          }`;
+          const isSelected =
+            selectedStallSeats.includes(seatKey) ||
+            selectedBalconySeats.includes(seatKey);
           const isHovered = seatHovered[seatKey];
 
           return (
@@ -165,8 +179,10 @@ const Seats = () => {
           {String.fromCharCode(65 + rowIndex)}
         </div>
         {row.map((seat, seatIndex) => {
-          const seatKey = `balcony-${rowIndex}-${seatIndex}`;
-          const isSelected = selectedSeats.includes(seatKey);
+          const seatKey = `balcony-${String.fromCharCode(65 + rowIndex)}${
+            seatIndex + 1
+          }`;
+          const isSelected = selectedBalconySeats.includes(seatKey);
           const isHovered = seatHovered[seatKey];
 
           return (
@@ -232,6 +248,17 @@ const Seats = () => {
     ));
   };
 
+  const handleConfirm = () => {
+    sessionStorage.setItem(
+      "selectedStallSeats",
+      JSON.stringify(selectedStallSeats)
+    );
+    sessionStorage.setItem(
+      "selectedBalconySeats",
+      JSON.stringify(selectedBalconySeats)
+    );
+  };
+
   return (
     <div className="relative bg-gray-100 min-h-screen">
       <Navbar />
@@ -249,7 +276,7 @@ const Seats = () => {
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke-width="1.5"
+                    strokeWidth="1.5"
                     stroke="currentColor"
                     className="w-4 h-4 font-bold"
                   >
@@ -339,7 +366,7 @@ const Seats = () => {
               <path
                 d="M0.841056 62.7002C374.273 -17.0999 555.38 -13.8243 928.07 61.0082"
                 stroke="#8F5555"
-                stroke-width="6"
+                strokeWidth="6"
               />
             </svg>
           </div>
@@ -376,11 +403,15 @@ const Seats = () => {
           <Link href={`/movies/id/seats/payment`} passHref>
             <button
               className={`py-2 px-16 rounded-lg ${
-                selectedSeats.length > 0
+                selectedStallSeats.length > 0 || selectedBalconySeats.length > 0
                   ? "bg-blue-500 hover:bg-blue-600"
                   : "bg-gray-400"
               } text-white`}
-              disabled={selectedSeats.length === 0}
+              disabled={
+                selectedStallSeats.length === 0 &&
+                selectedBalconySeats.length === 0
+              }
+              onClick={handleConfirm}
             >
               Confirm
             </button>

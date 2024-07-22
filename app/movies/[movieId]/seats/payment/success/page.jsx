@@ -1,7 +1,34 @@
+"use client";
 import Navbar from "@/app/components/navBar";
 import React from "react";
+import { useEffect, useState } from "react";
 
 function Success() {
+  const [stallSeats, setStallSeats] = useState("");
+  const [balconySeats, setBalconySeats] = useState("");
+
+  useEffect(() => {
+    const storedStallSeats = sessionStorage.getItem("selectedStallSeats");
+    const storedBalconySeats = sessionStorage.getItem("selectedBalconySeats");
+
+    if (storedStallSeats) {
+      const stallSeatsArray = JSON.parse(storedStallSeats).map((seat) => {
+        // Extract only the seat name (e.g., A12) from the key
+        const seatNameMatch = seat.match(/[A-Z]+\d+/);
+        return seatNameMatch ? seatNameMatch[0] : seat;
+      });
+      setStallSeats(stallSeatsArray.join(" "));
+    }
+    if (storedBalconySeats) {
+      const balconySeatsArray = JSON.parse(storedBalconySeats).map((seat) => {
+        // Extract only the seat name (e.g., A12) from the key
+        const seatNameMatch = seat.match(/[A-Z]+\d+/);
+        return seatNameMatch ? seatNameMatch[0] : seat;
+      });
+      setBalconySeats(balconySeatsArray.join(" "));
+    }
+  }, []);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
@@ -88,9 +115,13 @@ function Success() {
                 </div>
                 <div className=" ">
                   <p className=" text-gray-600 pb-1">Stall Seats</p>
-                  <p className=" font-bold pb-3">A1 B1 C1</p>
+                  <p className=" font-bold pb-3">
+                    {stallSeats ? stallSeats : "--"}
+                  </p>
                   <p className=" text-gray-600 pb-1"> Balcony Seats</p>
-                  <p className=" font-bold pb-3">A1 B1 C1</p>
+                  <p className=" font-bold pb-3">
+                    {balconySeats && balconySeats ? balconySeats : "--"}
+                  </p>
                   <p className=" text-gray-600 pb-1">Person info: </p>
                   <p className=" font-bold pb-3">3 Adult, 1 Child</p>
                   <p className=" text-gray-600 pb-1"> Booking Fees 250.00 </p>

@@ -1,14 +1,55 @@
+"use client";
 import Navbar from "@/app/components/navBar";
 import Link from "next/link";
 import React from "react";
+import { useEffect, useState } from "react";
 
 function Payment() {
+  const [stallSeats, setStallSeats] = useState("");
+  const [balconySeats, setBalconySeats] = useState("");
+
+  // useEffect(() => {
+  //   const storedStallSeats = localStorage.getItem("selectedStallSeats");
+  //   const storedBalconySeats = localStorage.getItem("selectedBalconySeats");
+
+  //   if (storedStallSeats) {
+  //     const stallSeatsArray = JSON.parse(storedStallSeats);
+  //     setStallSeats(stallSeatsArray.join(" "));
+  //   }
+  //   if (storedBalconySeats) {
+  //     const balconySeatsArray = JSON.parse(storedBalconySeats);
+  //     setBalconySeats(balconySeatsArray.join(" "));
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    const storedStallSeats = sessionStorage.getItem("selectedStallSeats");
+    const storedBalconySeats = sessionStorage.getItem("selectedBalconySeats");
+
+    if (storedStallSeats) {
+      const stallSeatsArray = JSON.parse(storedStallSeats).map((seat) => {
+        // Extract only the seat name (e.g., A12) from the key
+        const seatNameMatch = seat.match(/[A-Z]+\d+/);
+        return seatNameMatch ? seatNameMatch[0] : seat;
+      });
+      setStallSeats(stallSeatsArray.join(" "));
+    }
+    if (storedBalconySeats) {
+      const balconySeatsArray = JSON.parse(storedBalconySeats).map((seat) => {
+        // Extract only the seat name (e.g., A12) from the key
+        const seatNameMatch = seat.match(/[A-Z]+\d+/);
+        return seatNameMatch ? seatNameMatch[0] : seat;
+      });
+      setBalconySeats(balconySeatsArray.join(" "));
+    }
+  }, []);
+
   return (
     <div className="bg-gray-100 ">
       <Navbar />
-      <div className="max-w-7xl mx-auto mt-12 px-1 min-h-screen">
+      <div className="max-w-7xl mx-auto mt-12 px-1 md:min-h-screen">
         <div className="flex justify-between py-6">
-          <div className="bg-gray-100   p-8 flex-1 mr-16">
+          <div className="bg-gray-100 p-8  md:w-2/3   mr-0 md:mr-16">
             <h2 className="text-2xl font-semibold mb-6">YOUR DETAILS</h2>
             <form className="space-y-6">
               <div className="relative">
@@ -75,7 +116,7 @@ function Payment() {
 
             <div className="mt-8 p-6 bg-white rounded-md">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold w-1/2">
+                <h3 className="text-xl font-semibold w-1/2">
                   The Ministry of Ungentlemanly Warfare
                 </h3>
                 <div>
@@ -99,13 +140,19 @@ function Payment() {
                   </svg>
                   <div>
                     <p className="text-gray-600 text-center  ">Balcony Seats</p>
-                    <p className="text-sm font-semibold ">A1 B1 C1</p>
+                    <p className="text-sm font-semibold px-8">
+                      {" "}
+                      {balconySeats ? balconySeats : "--"}
+                    </p>
                   </div>
                 </div>
 
                 <div>
                   <p className="text-gray-600 text-center  ">Stall Seats</p>
-                  <p className="text-sm font-semibold ">A1 B1 C1</p>
+                  <p className="text-sm font-semibold px-8">
+                    {" "}
+                    {stallSeats ? stallSeats : "--"}
+                  </p>
                 </div>
               </div>
 
@@ -129,7 +176,7 @@ function Payment() {
               </Link>
             </div>
           </div>
-          <div className="w-1/3 h-[80vh] ">
+          <div className="order-1 md:w-1/3 md:h-[80vh] ">
             <img
               src="/Paymentpic.svg" // Replace with the correct path to the image
               alt="Movie Poster"
