@@ -72,11 +72,12 @@ function Movie() {
     if (error) {
       console.error("Error fetching shows:", error);
     } else {
-      console.log(shows);
+      //console.log(shows);
       setShows(shows);
       const showTimeIds = shows.map((show) => show.showTimeId);
       const theatreIds = shows.map((show) => show.theatreId);
       const screenIds = shows.map((show) => show.screenId);
+      //console.log(screenIds);
 
       fetchShowTimes(showTimeIds);
       fetchTheatres(theatreIds);
@@ -100,7 +101,7 @@ function Movie() {
 
   const fetchScreens = async (screenIds) => {
     const { data: screens, error } = await supabase
-      .from("theatres")
+      .from("screens")
       .select("*")
       .in("id", screenIds);
 
@@ -199,55 +200,60 @@ function Movie() {
     const [hrs = 0, mins = 0] = duration.split(":").map(Number);
     return `${hrs}hr ${mins}min`;
   };
-
-  // Group shows by theatreId
-  const groupShowsByTheatre = () => {
+  const groupShowsByTheatreAndScreen = () => {
     const grouped = theatres.reduce((acc, theatre) => {
-      acc[theatre.id] = shows.filter((show) => show.theatreId === theatre.id);
+      const theatreShows = shows.filter(
+        (show) => show.theatreId === theatre.id
+      );
+      const screensForTheatre = screens.filter((screen) =>
+        theatreShows.some((show) => show.screenId === screen.id)
+      );
+
+      acc[theatre.id] = screensForTheatre.map((screen) => ({
+        screen,
+        shows: theatreShows.filter((show) => show.screenId === screen.id),
+      }));
+
       return acc;
     }, {});
     return grouped;
   };
 
-  const groupedShows = groupShowsByTheatre();
+  const groupedShows = groupShowsByTheatreAndScreen();
 
-  // Render grouped shows
   const renderGroupedShows = () => {
     return Object.keys(groupedShows).map((theatreId) => {
       const theatre = theatres.find((theatre) => theatre.id == theatreId);
       return (
-        <div key={theatreId} className="w-3/4">
-          <h4 className="text-lg font-semibold mt-4">
+        <div key={theatreId} className="w-3/4 pb-5 mt-4">
+          <h4 className="text-lg  font-semibold">
+            {" "}
+            Theatre:-
             {theatre ? theatre.name : "loading"}
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-2">
-            {groupedShows[theatreId].map((show) => {
-              const showTime = showTimes.find(
-                (time) => time.id === show.showTimeId
-              );
-
-              return (
-                <div
-                  key={show.id}
-                  className="grid grid-cols-5 gap-2 w-3/4 mt-2"
-                >
-                  <Link href={`/movies/id/seats/`} passHref>
-                    <span
-                      key={show.id}
-                      className={`py-1 px-2 rounded ${
-                        // index === 1
-                        //   ? "bg-red-500 text-white"
-                        //   :
-                        "bg-gray-200 text-gray-800"
-                      }`}
-                    >
-                      {showTime ? formatShowTime(showTime.time) : "loading"}
-                    </span>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
+          {groupedShows[theatreId].map(({ screen, shows }) => (
+            <div key={screen.id} className="mt-2">
+              <h5 className="text-md font-semibold">
+                Screen:- {screen ? screen.name : "loading"}
+              </h5>
+              <div className="flex flex-wrap">
+                {shows.map((show) => {
+                  const showTime = showTimes.find(
+                    (time) => time.id === show.showTimeId
+                  );
+                  return (
+                    <Link key={show.id} href={`/movies/id/seats/`} passHref>
+                      <span
+                        className={`py-1 px-2 m-1 rounded ${"bg-gray-200 text-gray-800"}`}
+                      >
+                        {showTime ? formatShowTime(showTime.time) : "loading"}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       );
     });
