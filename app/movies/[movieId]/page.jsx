@@ -46,9 +46,9 @@ function Movie() {
 
   const getCurrentWeekDates = () => {
     const currentWeekDates = [];
-    for (let i = 1; i < 8; i++) {
+    for (let i = 0; i < 9; i++) {
       const date = new Date();
-      date.setDate(currentDate - currentDayOfWeek + i);
+      date.setDate(currentDate + i);
       currentWeekDates.push(date);
     }
     return currentWeekDates;
@@ -227,7 +227,10 @@ function Movie() {
               );
 
               return (
-                <div className="grid grid-cols-5 gap-2 w-3/4 mt-2">
+                <div
+                  key={show.id}
+                  className="grid grid-cols-5 gap-2 w-3/4 mt-2"
+                >
                   <Link href={`/movies/id/seats/`} passHref>
                     <span
                       key={show.id}
