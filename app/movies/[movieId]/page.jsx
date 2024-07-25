@@ -16,6 +16,9 @@ function Movie() {
   const [showTimes, setShowTimes] = useState([]);
   const [theatres, setTheatres] = useState([]);
   const [screens, setScreens] = useState([]);
+  const [selectedShowTime, setSelectedShowTime] = useState(null);
+
+  const [selectedDateTime, setSelectedDateTime] = useState("");
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -221,20 +224,33 @@ function Movie() {
 
   const groupedShows = groupShowsByTheatreAndScreen();
 
+  const handleShowTimeClick = (show) => {
+    setSelectedShowTime(show);
+
+    const showTime = showTimes.find((time) => time.id === show.showTimeId);
+    const formattedTime = showTime ? formatShowTime(showTime.time) : "loading";
+
+    const formattedDateTime = `${selectedDate.getDate()} ${
+      months[selectedDate.getMonth()]
+    } ${selectedDate.getFullYear()} ${formattedTime}`;
+    setSelectedDateTime(formattedDateTime);
+  };
+
+  console.log(selectedDateTime);
+
   const renderGroupedShows = () => {
     return Object.keys(groupedShows).map((theatreId) => {
       const theatre = theatres.find((theatre) => theatre.id == theatreId);
       return (
         <div key={theatreId} className="w-3/4 pb-5 mt-4">
-          <h4 className="text-lg  font-semibold">
+          <h4 className="text-xl  font-semibold">
             {" "}
-            Theatre:-
             {theatre ? theatre.name : "loading"}
           </h4>
           {groupedShows[theatreId].map(({ screen, shows }) => (
             <div key={screen.id} className="mt-2">
-              <h5 className="text-md font-semibold">
-                Screen:- {screen ? screen.name : "loading"}
+              <h5 className="text-sm pb-2 font-semibold">
+                {screen ? screen.name : "loading"}
               </h5>
               <div className="flex flex-wrap">
                 {shows.map((show) => {
@@ -242,9 +258,20 @@ function Movie() {
                     (time) => time.id === show.showTimeId
                   );
                   return (
-                    <Link key={show.id} href={`/movies/id/seats/`} passHref>
+                    <Link
+                      key={show.id}
+                      href={`/movies/${movieId}/seats${encodeURIComponent(
+                        selectedDateTime
+                      )}`}
+                      passHref
+                    >
                       <span
-                        className={`py-1 px-2 m-1 rounded ${"bg-gray-200 text-gray-800"}`}
+                        className={`py-1 px-2 m-1 rounded cursor-pointer ${
+                          selectedShowTime === show
+                            ? "bg-red-600 text-white"
+                            : "bg-gray-200 text-gray-800  hover:bg-red-600 hover:text-white"
+                        }`}
+                        onClick={() => handleShowTimeClick(show)}
                       >
                         {showTime ? formatShowTime(showTime.time) : "loading"}
                       </span>

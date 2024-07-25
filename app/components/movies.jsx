@@ -1,21 +1,8 @@
-// app/movies/page.js
-
 "use client";
 
 import { useState, useEffect } from "react";
 import { supabase } from "./../supabaseClient";
 import Image from "next/image";
-import movie1 from "../../public/assets/images/movie1.png";
-import movie2 from "../../public/assets/images/movie2.png";
-import movie3 from "../../public/assets/images/movie3.png";
-import movie4 from "../../public/assets/images/movie4.png";
-import movie5 from "../../public/assets/images/movie5.png";
-import movie6 from "../../public/assets/images/movie6.png";
-import movie7 from "../../public/assets/images/movie7.png";
-import movie8 from "../../public/assets/images/movie8.png";
-import movie9 from "../../public/assets/images/movie9.png";
-import movie10 from "../../public/assets/images/movie10.png";
-
 import Link from "next/link";
 
 const Movies = () => {
@@ -29,7 +16,7 @@ const Movies = () => {
 
   useEffect(() => {
     fetchMovies();
-  }, []);
+  }, [selectedDay, selectedGenre, selectedLanguage]);
 
   useEffect(() => {
     fetchGenresAndLanguages();
@@ -57,51 +44,65 @@ const Movies = () => {
 
     const today = new Date();
     let targetDate;
-
     if (selectedDay === "tomorrow") {
       targetDate = new Date(today);
       targetDate.setDate(today.getDate() + 1);
+    } else if (selectedDay === "comingSoon") {
+      targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + 7); // Assuming 'coming soon' means 7 days from today
     } else {
       targetDate = today;
     }
 
     const formattedDate = targetDate.toISOString().split("T")[0];
+    console.log(formattedDate);
 
-    let query = supabase
+    let showsQuery = supabase
+      .from("shows")
+      .select("movieId")
+      .eq("date", formattedDate);
+
+    let { data: showsData, error: showsError } = await showsQuery;
+
+    if (showsError) {
+      console.error("Error fetching shows:", showsError);
+      setIsLoading(false);
+      return;
+    }
+
+    const movieIds = showsData.map((show) => show.movieId);
+
+    let moviesQuery = supabase
       .from("movies")
       .select(
         `
         *,
-        movie_genre (*, 
-          genre_id,
-          genres (genre_name)
-        ),  
-        movie_language (*, 
-          language_id,
-          languages (language_name)
-        )
+        movie_genre (*, genre_id, genres (genre_name)),
+        movie_language (*, language_id, languages (language_name))
       `
       )
-      .lte("release_date", formattedDate);
+      .in("id", movieIds);
 
     if (selectedGenre) {
-      query = query.eq("movie_genre.genre_id", selectedGenre);
+      moviesQuery = moviesQuery.eq("movie_genre.genre_id", selectedGenre);
     }
 
     if (selectedLanguage) {
-      query = query.eq("movie_language.language_id", selectedLanguage);
+      moviesQuery = moviesQuery.eq(
+        "movie_language.language_id",
+        selectedLanguage
+      );
     }
 
-    let { data, error } = await query.limit(10);
+    let { data: moviesData, error: moviesError } = await moviesQuery;
 
-    if (error) console.error("Error fetching data:", error);
-    setMovies(data);
+    if (moviesError) {
+      console.error("Error fetching movies:", moviesError);
+    }
 
+    setMovies(moviesData);
     setIsLoading(false);
   };
-
-  console.log(movies);
-  console.log(selectedGenre);
 
   const formatDuration = (duration) => {
     const [hrs, mins] = duration.split(":").map(Number);
@@ -109,6 +110,7 @@ const Movies = () => {
   };
 
   const capitalizeFirstLetter = (string) => {
+    if (typeof string !== "string" || !string) return "";
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
@@ -119,13 +121,15 @@ const Movies = () => {
     }
     return "-";
   };
+
+  console.log(movies);
   return (
     <div className="bg-pink-50 min-h-screen">
       <div className="container mx-auto py-8">
         <div className="flex justify-between mb-6 px-2">
           <div className="flex space-x-4">
             <h6
-              className={` text-xs sm:text-lg font-semibold cursor-pointer ${
+              className={`text-xs sm:text-lg font-semibold cursor-pointer ${
                 selectedDay === "today" ? "text-purple-600" : "text-black"
               }`}
               onClick={() => setSelectedDay("today")}
@@ -133,32 +137,43 @@ const Movies = () => {
               Today
             </h6>
             <h6
-              className="text-xs sm:text-lg font-semibold cursor-pointer"
+              className={`text-xs sm:text-lg font-semibold cursor-pointer ${
+                selectedDay === "tomorrow" ? "text-purple-600" : "text-black"
+              }`}
               onClick={() => setSelectedDay("tomorrow")}
             >
               Tomorrow
             </h6>
             <h6
-              className="text-xs sm:text-lg font-semibold cursor-pointer"
+              className={`text-xs sm:text-lg font-semibold cursor-pointer ${
+                selectedDay === "comingSoon" ? "text-purple-600" : "text-black"
+              }`}
               onClick={() => setSelectedDay("comingSoon")}
             >
               Coming Soon
             </h6>
           </div>
-          <div className="hidden  md:block `flex space-x-4 `">
-            <p></p>
-            <select className="rounded-full bg-purple-600 text-white px-4 py-2 text-sm w-15 lg:w-36">
-              <option>Genre</option>
+          <div className="hidden md:flex space-x-4">
+            <select
+              className="rounded-full bg-purple-600 text-white px-4 py-2 text-sm w-15 lg:w-36"
+              value={selectedGenre}
+              onChange={(e) => setSelectedGenre(e.target.value)}
+            >
+              <option value="">Genre</option>
               {genres.map((genre) => (
-                <option key={genre.id} value={genre.genre_name}>
+                <option key={genre.id} value={genre.id}>
                   {genre.genre_name}
                 </option>
               ))}
             </select>
-            <select className="rounded-full bg-purple-600 text-white px-4 py-2 text-sm w-15 lg:w-36">
-              <option value=""> Language</option>
+            <select
+              className="rounded-full bg-purple-600 text-white px-4 py-2 text-sm w-15 lg:w-36"
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+            >
+              <option value="">Language</option>
               {languages.map((language) => (
-                <option key={language.id} value={language.language_name}>
+                <option key={language.id} value={language.id}>
                   {language.language_name}
                 </option>
               ))}
@@ -171,7 +186,7 @@ const Movies = () => {
 
         {isLoading ? (
           <div className="flex justify-center items-center">
-            <div className="loader"> loading... </div>
+            <div className="loader">Loading...</div>
           </div>
         ) : (
           <div className="grid grid-cols-2 px-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -186,14 +201,15 @@ const Movies = () => {
                     className="w-full h-30 md:72 rounded-lg"
                     style={{ objectFit: "cover" }}
                     loading="lazy"
+                    // sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
                   />
                   <p className="text-xs mt-2">
                     {capitalizeFirstLetter(
-                      item.movie_genre[0]?.genres.genre_name
+                      item.movie_genre[0]?.genres?.genre_name
                     )}
                     /{getYearFromDate(item.release_date)}/
                     {formatDuration(item.duration)}/
-                    {item.movie_language[0]?.languages.language_name}
+                    {item.movie_language[0]?.languages?.language_name}
                   </p>
                   <h6 className="text-lg font-semibold">{item.title}</h6>
                 </div>
