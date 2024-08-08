@@ -16,7 +16,7 @@ export const Promotions = () => {
     },
     {
       img: promotion2,
-      name: "Free Popcorn",
+      name: "Free Popcorn and Snacks",
       type: "Promotions",
       location: "at Raja Theater",
       deadline: "until 05th May 2025",

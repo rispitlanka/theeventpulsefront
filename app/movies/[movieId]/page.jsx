@@ -4,7 +4,6 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "./../../supabaseClient";
-import img from "../../../public/Picture.svg";
 
 function Movie() {
   const { movieId } = useParams();
@@ -18,7 +17,9 @@ function Movie() {
   const [screens, setScreens] = useState([]);
   const [selectedShowTime, setSelectedShowTime] = useState(null);
 
-  const [selectedDateTime, setSelectedDateTime] = useState("");
+  const [selectedDateTime, setSelectedDateTime] = useState();
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = [
@@ -87,6 +88,8 @@ function Movie() {
       fetchScreens(screenIds);
     }
   };
+
+  console.log(theatres);
 
   const fetchTheatres = async (theatreIds) => {
     const { data: theatres, error } = await supabase
@@ -224,7 +227,10 @@ function Movie() {
 
   const groupedShows = groupShowsByTheatreAndScreen();
 
+  console.log(selectedShowTime);
+
   const handleShowTimeClick = (show) => {
+    console.log(show);
     setSelectedShowTime(show);
 
     const showTime = showTimes.find((time) => time.id === show.showTimeId);
@@ -233,54 +239,84 @@ function Movie() {
     const formattedDateTime = `${selectedDate.getDate()} ${
       months[selectedDate.getMonth()]
     } ${selectedDate.getFullYear()} ${formattedTime}`;
+    console.log(formattedDateTime);
     setSelectedDateTime(formattedDateTime);
+
+    console.log(selectedDateTime);
   };
 
   console.log(selectedDateTime);
 
   const renderGroupedShows = () => {
-    return Object.keys(groupedShows).map((theatreId) => {
+    const theatresWithShows = Object.keys(groupedShows).filter((theatreId) =>
+      groupedShows[theatreId].some(({ shows }) => shows.length > 0)
+    );
+
+    if (theatresWithShows.length === 0) {
+      return <div className="w-3/4 pb-5 mt-4">No shows available.</div>;
+    }
+
+    return theatresWithShows.map((theatreId) => {
       const theatre = theatres.find((theatre) => theatre.id == theatreId);
       return (
         <div key={theatreId} className="w-3/4 pb-5 mt-4">
-          <h4 className="text-xl  font-semibold">
-            {" "}
+          <h4 className="text-xl font-semibold">
             {theatre ? theatre.name : "loading"}
           </h4>
-          {groupedShows[theatreId].map(({ screen, shows }) => (
-            <div key={screen.id} className="mt-2">
-              <h5 className="text-sm pb-2 font-semibold">
-                {screen ? screen.name : "loading"}
-              </h5>
-              <div className="flex flex-wrap">
-                {shows.map((show) => {
-                  const showTime = showTimes.find(
-                    (time) => time.id === show.showTimeId
-                  );
-                  return (
-                    <Link
-                      key={show.id}
-                      href={`/movies/${movieId}/seats${encodeURIComponent(
-                        selectedDateTime
-                      )}`}
-                      passHref
-                    >
-                      <span
-                        className={`py-1 px-2 m-1 rounded cursor-pointer ${
-                          selectedShowTime === show
-                            ? "bg-red-600 text-white"
-                            : "bg-gray-200 text-gray-800  hover:bg-red-600 hover:text-white"
-                        }`}
-                        onClick={() => handleShowTimeClick(show)}
-                      >
-                        {showTime ? formatShowTime(showTime.time) : "loading"}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+          {groupedShows[theatreId].map(
+            ({ screen, shows }) =>
+              shows.length > 0 && (
+                <div key={screen.id} className="mt-2">
+                  <h5 className="text-sm pb-2 font-semibold">
+                    {screen ? screen.name : "loading"}
+                  </h5>
+                  <div className="flex flex-wrap">
+                    {shows.map((show) => {
+                      const showTime = showTimes.find(
+                        (time) => time.id === show.showTimeId
+                      );
+
+                      const formatDate = (date) => {
+                        const options = {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        };
+                        return date.toLocaleDateString("en-GB", options);
+                      };
+                      console.log(theatre.name);
+                      const queryParams = `?date=${formatDate(
+                        selectedDate
+                      )}&time=${showTime?.time}&theatre=${
+                        theatre.name
+                      }&screen=${screen.name}`;
+                      console.log(show);
+
+                      return (
+                        <Link
+                          key={show.id}
+                          href={`/movies/${movieId}/seats${queryParams}`}
+                          passHref
+                        >
+                          <span
+                            className={`py-1 px-2 m-1 rounded cursor-pointer ${
+                              selectedShowTime === show
+                                ? "bg-red-600 text-white"
+                                : "bg-gray-200 text-gray-800 hover:bg-red-600 hover:text-white"
+                            }`}
+                            onClick={() => handleShowTimeClick(show)}
+                          >
+                            {showTime
+                              ? formatShowTime(showTime.time)
+                              : "loading"}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )
+          )}
         </div>
       );
     });
@@ -563,52 +599,6 @@ function Movie() {
 
                 <div>{renderGroupedShows()}</div>
               </div>
-
-              {/* <div className="bg-gray-200 p-6 rounded-lg shadow-md mt-6 flex items-center">
-                <div className="flex-grow">
-                  <h2 className="text-xl font-semibold mb-4">
-                    Your Selections
-                  </h2>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm mb-2">
-                        Screen:{" "}
-                        <span className="font-semibold text-lg">
-                          Regal [ SILVER 2D ]
-                        </span>
-                      </p>
-                      <p className="text-sm">
-                        Time:{" "}
-                        <span className="font-semibold text-lg">
-                          16 Jan 2024 14:40
-                        </span>
-                      </p>
-                    </div>
-                    <Link href={`/movies/id/seats`} passHref>
-                      <button className="bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 mr-2"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M8 9l4 4-4 4m6-8l4 4-4 4"
-                          />
-                        </svg>
-                        Seats
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <p className="text-center text-xs mt-2 text-gray-500">
-                * Seat selection can be done after this
-              </p> */}
             </div>
           </div>
         </div>

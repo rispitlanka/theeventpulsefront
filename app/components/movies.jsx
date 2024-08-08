@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { supabase } from "./../supabaseClient";
 import Image from "next/image";
@@ -15,11 +14,8 @@ const Movies = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("");
 
   useEffect(() => {
-    fetchMovies();
-  }, [selectedDay, selectedGenre, selectedLanguage]);
-
-  useEffect(() => {
     fetchGenresAndLanguages();
+    fetchMovies(selectedDay, selectedGenre, selectedLanguage);
   }, []);
 
   const fetchGenresAndLanguages = async () => {
@@ -39,69 +35,147 @@ const Movies = () => {
     setLanguages(languagesData);
   };
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (day, genre, language) => {
+    console.log(day, genre, language);
     setIsLoading(true);
 
     const today = new Date();
+
     let targetDate;
-    if (selectedDay === "tomorrow") {
+    if (day === "tomorrow") {
       targetDate = new Date(today);
       targetDate.setDate(today.getDate() + 1);
-    } else if (selectedDay === "comingSoon") {
-      targetDate = new Date(today);
-      targetDate.setDate(today.getDate() + 7); // Assuming 'coming soon' means 7 days from today
     } else {
       targetDate = today;
     }
 
-    const formattedDate = targetDate.toISOString().split("T")[0];
-    console.log(formattedDate);
-
-    let showsQuery = supabase
-      .from("shows")
-      .select("movieId")
-      .eq("date", formattedDate);
-
-    let { data: showsData, error: showsError } = await showsQuery;
-
-    if (showsError) {
-      console.error("Error fetching shows:", showsError);
+    if (day === "comingSoon") {
+      targetDate = new Date(today);
+      const date = targetDate.setDate(today.getDate()); // Assuming 'coming soon' means 7 days from today
+      const formattedDateStr = formatDateToDDMMYYYY(date);
+      await fetchComingMovies(formattedDateStr, genre, language);
       setIsLoading(false);
-      return;
-    }
+    } else {
+      const formattedDate = targetDate.toISOString().split("T")[0];
 
-    const movieIds = showsData.map((show) => show.movieId);
+      let showsQuery = supabase
+        .from("shows")
+        .select("movieId")
+        .eq("date", formattedDate);
 
-    let moviesQuery = supabase
-      .from("movies")
-      .select(
+      let { data: showsData, error: showsError } = await showsQuery;
+
+      if (showsError) {
+        console.error("Error fetching shows:", showsError);
+        setIsLoading(false);
+        return;
+      }
+
+      const movieIds = showsData.map((show) => show.movieId);
+
+      let moviesQuery = supabase
+        .from("movies")
+        .select(
+          `*,
+          movie_genre!inner(*, genre_id, genres!inner(id,genre_name)),
+          movie_language!inner (*, language_id, languages!inner (language_name))
         `
-        *,
-        movie_genre (*, genre_id, genres (genre_name)),
-        movie_language (*, language_id, languages (language_name))
-      `
-      )
-      .in("id", movieIds);
+        )
+        .in("id", movieIds);
 
-    if (selectedGenre) {
-      moviesQuery = moviesQuery.eq("movie_genre.genre_id", selectedGenre);
+      console.log(moviesQuery);
+      console.log(genre);
+      if (genre) {
+        moviesQuery = moviesQuery.filter("movie_genre.genres.id", "eq", genre);
+      }
+
+      if (language) {
+        moviesQuery = moviesQuery.filter(
+          "movie_language.language_id",
+          "eq",
+          language
+        );
+      }
+
+      let { data: moviesData, error: moviesError } = await moviesQuery;
+
+      if (moviesError) {
+        console.error("Error fetching movies:", moviesError);
+      }
+
+      setMovies(moviesData);
+      setIsLoading(false);
+    }
+  };
+
+  function formatDateToDDMMYYYY(date) {
+    if (!(date instanceof Date)) {
+      date = new Date(date);
     }
 
-    if (selectedLanguage) {
-      moviesQuery = moviesQuery.eq(
-        "movie_language.language_id",
-        selectedLanguage
-      );
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
     }
 
-    let { data: moviesData, error: moviesError } = await moviesQuery;
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const year = date.getFullYear();
 
-    if (moviesError) {
-      console.error("Error fetching movies:", moviesError);
+    return `${year}-${month}-${day}`;
+  }
+
+  async function fetchComingMovies(date, genre, language) {
+    setMovies([]);
+    console.log("hello");
+    try {
+      let moviesQuery = supabase
+        .from("movies")
+        .select(
+          `
+          *,
+          movie_genre!inner (*, genre_id, genres!inner (genre_name)),
+          movie_language!inner (*, language_id, languages!inner (language_name))
+        `
+        )
+        .gt("release_date", date);
+
+      if (genre) {
+        moviesQuery = moviesQuery.eq("movie_genre.genre_id", genre);
+        console.log(moviesQuery);
+      }
+
+      if (language) {
+        moviesQuery = moviesQuery.eq("movie_language.language_id", language);
+      }
+
+      const { data, error } = await moviesQuery;
+
+      if (error) {
+        throw error;
+      }
+
+      setMovies(data);
+    } catch (error) {
+      console.error("Error fetching coming movies:", error);
     }
+  }
 
-    setMovies(moviesData);
-    setIsLoading(false);
+  const handleDateClick = (day) => {
+    setSelectedDay(day);
+    fetchMovies(day, selectedGenre, selectedLanguage);
+  };
+
+  const handleGenreChange = (e) => {
+    const genre = e.target.value;
+    setSelectedGenre(genre);
+    console.log(genre, selectedDay, selectedLanguage);
+    fetchMovies(selectedDay, genre, selectedLanguage);
+  };
+
+  const handleLanguageChange = (e) => {
+    const language = e.target.value;
+    setSelectedLanguage(language);
+    fetchMovies(selectedDay, selectedGenre, language);
   };
 
   const formatDuration = (duration) => {
@@ -115,14 +189,13 @@ const Movies = () => {
   };
 
   const getYearFromDate = (date) => {
-    const dateParts = date.split("/");
+    const dateParts = date.split("-");
     if (dateParts.length === 3) {
-      return dateParts[2];
+      return dateParts[0];
     }
     return "-";
   };
 
-  console.log(movies);
   return (
     <div className="bg-pink-50 min-h-screen">
       <div className="container mx-auto py-8">
@@ -132,7 +205,7 @@ const Movies = () => {
               className={`text-xs sm:text-lg font-semibold cursor-pointer ${
                 selectedDay === "today" ? "text-purple-600" : "text-black"
               }`}
-              onClick={() => setSelectedDay("today")}
+              onClick={() => handleDateClick("today")}
             >
               Today
             </h6>
@@ -140,7 +213,7 @@ const Movies = () => {
               className={`text-xs sm:text-lg font-semibold cursor-pointer ${
                 selectedDay === "tomorrow" ? "text-purple-600" : "text-black"
               }`}
-              onClick={() => setSelectedDay("tomorrow")}
+              onClick={() => handleDateClick("tomorrow")}
             >
               Tomorrow
             </h6>
@@ -148,30 +221,33 @@ const Movies = () => {
               className={`text-xs sm:text-lg font-semibold cursor-pointer ${
                 selectedDay === "comingSoon" ? "text-purple-600" : "text-black"
               }`}
-              onClick={() => setSelectedDay("comingSoon")}
+              onClick={() => handleDateClick("comingSoon")}
             >
               Coming Soon
             </h6>
           </div>
+
           <div className="hidden md:flex space-x-4">
             <select
               className="rounded-full bg-purple-600 text-white px-4 py-2 text-sm w-15 lg:w-36"
               value={selectedGenre}
-              onChange={(e) => setSelectedGenre(e.target.value)}
+              onChange={handleGenreChange}
             >
-              <option value="">Genre</option>
+              <option value="">Genres</option>
               {genres.map((genre) => (
                 <option key={genre.id} value={genre.id}>
                   {genre.genre_name}
                 </option>
               ))}
             </select>
+
             <select
+              id="language-select"
               className="rounded-full bg-purple-600 text-white px-4 py-2 text-sm w-15 lg:w-36"
               value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
+              onChange={handleLanguageChange}
             >
-              <option value="">Language</option>
+              <option value="">Languages</option>
               {languages.map((language) => (
                 <option key={language.id} value={language.id}>
                   {language.language_name}
@@ -188,11 +264,11 @@ const Movies = () => {
           <div className="flex justify-center items-center">
             <div className="loader">Loading...</div>
           </div>
-        ) : (
+        ) : movies && movies.length > 0 ? (
           <div className="grid grid-cols-2 px-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {movies.map((item, index) => (
-              <Link key={index} href={`/movies/${item.id}`} passHref>
-                <div key={index} className="p-2">
+            {movies.map((item) => (
+              <Link key={item.id} href={`/movies/${item.id}`} passHref>
+                <div className="p-2">
                   <Image
                     src={item.poster}
                     alt={item.title}
@@ -201,7 +277,6 @@ const Movies = () => {
                     className="w-full h-30 md:72 rounded-lg"
                     style={{ objectFit: "cover" }}
                     loading="lazy"
-                    // sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
                   />
                   <p className="text-xs mt-2">
                     {capitalizeFirstLetter(
@@ -216,6 +291,8 @@ const Movies = () => {
               </Link>
             ))}
           </div>
+        ) : (
+          <div className="text-center">No movies available.</div>
         )}
       </div>
     </div>

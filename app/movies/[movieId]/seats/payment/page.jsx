@@ -28,7 +28,6 @@ function Payment() {
 
     if (storedStallSeats) {
       const stallSeatsArray = JSON.parse(storedStallSeats).map((seat) => {
-        // Extract only the seat name (e.g., A12) from the key
         const seatNameMatch = seat.match(/[A-Z]+\d+/);
         return seatNameMatch ? seatNameMatch[0] : seat;
       });
@@ -36,7 +35,6 @@ function Payment() {
     }
     if (storedBalconySeats) {
       const balconySeatsArray = JSON.parse(storedBalconySeats).map((seat) => {
-        // Extract only the seat name (e.g., A12) from the key
         const seatNameMatch = seat.match(/[A-Z]+\d+/);
         return seatNameMatch ? seatNameMatch[0] : seat;
       });
@@ -80,7 +78,6 @@ function Payment() {
                     className="block p-3 border border-gray-300 rounded-l-md"
                   >
                     <option value="+94">+94</option>
-                    {/* Add other country codes as needed */}
                   </select>
                   <div className="relative w-full">
                     <svg
@@ -178,7 +175,7 @@ function Payment() {
           </div>
           <div className="order-1 md:w-1/3 md:h-[80vh] ">
             <img
-              src="/Paymentpic.svg" // Replace with the correct path to the image
+              src="/indian2.png"
               alt="Movie Poster"
               className="rounded-lg  w-full mt-6  object-cover"
             />

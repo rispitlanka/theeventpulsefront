@@ -29,7 +29,7 @@ const Theaters = () => {
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-between bg-white py-12 px-4 md:px-8">
-      <div className="text-center md:text-left md:w-1/2">
+      <div className="text-center md:text-left pl-5 md:w-1/2">
         <h2 className="text-3xl font-bold mb-4">
           Are you a theater Owner? Join with us
         </h2>

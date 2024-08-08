@@ -1,11 +1,31 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "@/app/components/navBar";
 import Link from "next/link";
 import "../seats/seatstyle.css";
+//import { useParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+// import { supabase } from "@/lib/supabaseClient";
 
 const Seats = () => {
+  const [formattedTime, setFormattedTime] = useState("");
+
+  const searchParams = useSearchParams();
+  const date = searchParams.get("date");
+  const showTime = searchParams.get("time");
+  const theatre = searchParams.get("theatre");
+  const screen = searchParams.get("screen");
+
+  useEffect(() => {
+    if (showTime) {
+      const timeParts = showTime.split(":");
+      if (timeParts.length === 3) {
+        setFormattedTime(`${timeParts[0]}:${timeParts[1]}`);
+      }
+    }
+  }, [showTime]);
+
   const [selectedStallSeats, setSelectedStallSeats] = useState([]);
   const [selectedBalconySeats, setSelectedBalconySeats] = useState([]);
   const [seatHovered, setSeatHovered] = useState({});
@@ -393,11 +413,16 @@ const Seats = () => {
           <div className="flex items-center space-x-2">
             <span className="text-gray-600">
               Time:{" "}
-              <span className="font-bold text-black">16 Jan 2024 14 :40</span>
+              <span className="font-bold text-black">
+                {date} {formattedTime} {/*16 Jan 2024 14 :40*/}
+              </span>
             </span>
             <span className="text-gray-600">
               Screen:{" "}
-              <span className="font-bold text-black"> Regal [SILVER 2D]</span>
+              <span className="font-bold text-black">
+                {" "}
+                {theatre} [{screen}]
+              </span>
             </span>
           </div>
           <Link href={`/movies/id/seats/payment`} passHref>
