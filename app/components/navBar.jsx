@@ -7,9 +7,7 @@ function Navbar() {
       <header className="absolute top-0 bg-white left-0 right-0 z-50">
         <div className=" mx-auto">
           <nav className="flex items-center justify-between py-2 px-2">
-            <h1 className="text-sm md:text-lg font-extrabold">
-              TheTicketBooking
-            </h1>
+            <h1 className="text-sm md:text-lg font-extrabold">Seat Snaps</h1>
 
             <div className="hidden md:block">
               <ul className="flex space-x-6">

@@ -6,16 +6,28 @@ import Link from "next/link";
 import "../seats/seatstyle.css";
 //import { useParams } from "next/navigation";
 import { useRouter, useSearchParams } from "next/navigation";
-// import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "./../../../supabaseClient";
 
 const Seats = () => {
   const [formattedTime, setFormattedTime] = useState("");
+  const [selectedStallSeats, setSelectedStallSeats] = useState([]);
+  const [selectedBalconySeats, setSelectedBalconySeats] = useState([]);
+  const [seatHovered, setSeatHovered] = useState({});
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [zonesData, setZonesData] = useState([]);
+  const [screens, setScreens] = useState([]);
+  const [movieData, setMovieData] = useState([]);
 
   const searchParams = useSearchParams();
   const date = searchParams.get("date");
   const showTime = searchParams.get("time");
   const theatre = searchParams.get("theatre");
   const screen = searchParams.get("screen");
+  const showId = searchParams.get("showId");
+  const screenId = searchParams.get("screenId");
+  const theatreId = searchParams.get("theatreId");
+  const movieId = searchParams.get("movieId");
 
   useEffect(() => {
     if (showTime) {
@@ -26,10 +38,172 @@ const Seats = () => {
     }
   }, [showTime]);
 
-  const [selectedStallSeats, setSelectedStallSeats] = useState([]);
-  const [selectedBalconySeats, setSelectedBalconySeats] = useState([]);
-  const [seatHovered, setSeatHovered] = useState({});
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      await fetchMovieData();
+      await fetchZonesData();
+      await fetchShowData();
+      // await fetchBookedTickets();
+      // await fetchOtherShows();
+      await fetchScreens();
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [showId]);
+
+  const fetchZonesData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("zones")
+        .select("*")
+        .eq("screenId", screenId);
+      if (error) throw error;
+      if (data) {
+        setZonesData(data);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchMovieData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("movies")
+        .select("*")
+        .eq("id", movieId);
+      if (error) throw error;
+      if (data) {
+        setMovieData(data);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchShowData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("shows")
+        .select("*, showTime(*)")
+        .eq("id", showId);
+
+      if (error) throw error;
+
+      if (data) {
+        setShowData(data);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const fetchOtherShows = async () => {
+  //   try {
+  //     const {
+  //       data: otherShowsDataResponse,
+  //       error: otherShowsDataResponseError,
+  //     } = await supabase
+  //       .from("shows")
+  //       .select("*")
+  //       .eq("date", date)
+  //       .eq("screenId", screenId)
+  //       .eq("movieId", movieId);
+
+  //     if (otherShowsDataResponseError) {
+  //       console.log(otherShowsDataResponseError);
+  //       return;
+  //     }
+  //     setOtherShows(otherShowsDataResponse);
+
+  //     const otherShowsTimeIds = otherShowsDataResponse.map(
+  //       (show) => show.showTimeId
+  //     );
+
+  //     const {
+  //       data: otherShowsTimeDataResponse,
+  //       error: otherShowsTimeDataResponseError,
+  //     } = await supabase
+  //       .from("showTime")
+  //       .select("*")
+  //       .in("id", otherShowsTimeIds);
+
+  //     if (otherShowsTimeDataResponseError) {
+  //       return;
+  //     }
+  //     setOtherShowTimes(otherShowsTimeDataResponse);
+  //   } catch (error) {
+  //     console.log("Error in fetching other shows", error);
+  //   }
+  // };
+
+  const fetchScreens = async () => {
+    try {
+      if (screenId) {
+        const { data, error } = await supabase
+          .from("screens")
+          .select("*")
+          .eq("id", screenId);
+        if (data) {
+          setScreens(data);
+          console.log("screens", data);
+        }
+        if (error) {
+          console.log(error);
+        }
+      }
+    } catch (error) {
+      console.log("Error in fetching screens", error);
+    }
+  };
+
+  // const fetchBookedTickets = async () => {
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("tickets")
+  //       .select("*")
+  //       .eq("showId", showId);
+
+  //     if (data) {
+  //       console.log("booked tickets", data);
+  //       const seatIds = data.map((ticket) => ticket.seatId);
+  //       const seatResponses = await Promise.all(
+  //         seatIds.map(async (seatId) => {
+  //           const { data: seatData, error: seatError } = await supabase
+  //             .from("seats")
+  //             .select("zoneId, row, column")
+  //             .eq("id", seatId);
+  //           if (seatData) {
+  //             return seatData[0];
+  //           }
+  //           if (seatError) {
+  //             console.log("Error fetching seat:", seatError);
+  //             return null;
+  //           }
+  //         })
+  //       );
+  //       console.log("Seat details:", seatResponses);
+  //       setSeatResponses(seatResponses);
+  //     }
+
+  //     if (error) {
+  //       console.log(error);
+  //     }
+  //   } catch (error) {
+  //     console.log("Error in fetching booked tickets", error);
+  //   }
+  // };
+
+  // const updateBookedSeats = (newBookedSeats) => {
+  //   console.log("Updating booked seats:", newBookedSeats);
+  //   setBookedSeats(newBookedSeats);
+  // };
+
+  const queryParams = `?date=${date}&time=${formattedTime}&theatre=${theatre}&screen=${screen}&theatreId=${theatreId}&movieId=${movieId}&stallSeats=${selectedStallSeats}&balconySeats=${selectedBalconySeats}`;
 
   const handleMouseEnter = (section, side, rowIndex, seatIndex) => {
     const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
@@ -268,16 +442,16 @@ const Seats = () => {
     ));
   };
 
-  const handleConfirm = () => {
-    sessionStorage.setItem(
-      "selectedStallSeats",
-      JSON.stringify(selectedStallSeats)
-    );
-    sessionStorage.setItem(
-      "selectedBalconySeats",
-      JSON.stringify(selectedBalconySeats)
-    );
-  };
+  // const handleConfirm = () => {
+  //   sessionStorage.setItem(
+  //     "selectedStallSeats",
+  //     JSON.stringify(selectedStallSeats)
+  //   );
+  //   sessionStorage.setItem(
+  //     "selectedBalconySeats",
+  //     JSON.stringify(selectedBalconySeats)
+  //   );
+  // };
 
   return (
     <div className="relative bg-gray-100 min-h-screen">
@@ -425,7 +599,8 @@ const Seats = () => {
               </span>
             </span>
           </div>
-          <Link href={`/movies/id/seats/payment`} passHref>
+
+          <Link href={`/movies/id/seats/payment${queryParams}`} passHref>
             <button
               className={`py-2 px-16 rounded-lg ${
                 selectedStallSeats.length > 0 || selectedBalconySeats.length > 0
@@ -436,7 +611,6 @@ const Seats = () => {
                 selectedStallSeats.length === 0 &&
                 selectedBalconySeats.length === 0
               }
-              onClick={handleConfirm}
             >
               Confirm
             </button>

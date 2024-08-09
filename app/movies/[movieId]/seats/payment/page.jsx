@@ -1,46 +1,79 @@
 "use client";
 import Navbar from "@/app/components/navBar";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { useEffect, useState } from "react";
+import { supabase } from "./../../../../supabaseClient";
 
 function Payment() {
   const [stallSeats, setStallSeats] = useState("");
   const [balconySeats, setBalconySeats] = useState("");
+  const [movieData, setMovieData] = useState(null);
 
-  // useEffect(() => {
-  //   const storedStallSeats = localStorage.getItem("selectedStallSeats");
-  //   const storedBalconySeats = localStorage.getItem("selectedBalconySeats");
-
-  //   if (storedStallSeats) {
-  //     const stallSeatsArray = JSON.parse(storedStallSeats);
-  //     setStallSeats(stallSeatsArray.join(" "));
-  //   }
-  //   if (storedBalconySeats) {
-  //     const balconySeatsArray = JSON.parse(storedBalconySeats);
-  //     setBalconySeats(balconySeatsArray.join(" "));
-  //   }
-  // }, []);
+  const searchParams = useSearchParams();
+  const date = searchParams.get("date");
+  const showTime = searchParams.get("time");
+  const storedStallSeats = searchParams.get("stallSeats");
+  const storedBalconySeats = searchParams.get("balconySeats");
+  const movieId = searchParams.get("movieId");
+  const theatre = searchParams.get("theatre");
+  const theatreId = searchParams.get("theatreId");
+  const screen = searchParams.get("screen");
 
   useEffect(() => {
-    const storedStallSeats = sessionStorage.getItem("selectedStallSeats");
-    const storedBalconySeats = sessionStorage.getItem("selectedBalconySeats");
-
     if (storedStallSeats) {
-      const stallSeatsArray = JSON.parse(storedStallSeats).map((seat) => {
+      // Split the stored string into an array if it isn't already an array
+      const stallSeatsArray = Array.isArray(storedStallSeats)
+        ? storedStallSeats
+        : storedStallSeats.split(",");
+      const formattedStallSeats = stallSeatsArray.map((seat) => {
         const seatNameMatch = seat.match(/[A-Z]+\d+/);
         return seatNameMatch ? seatNameMatch[0] : seat;
       });
-      setStallSeats(stallSeatsArray.join(" "));
+      setStallSeats(formattedStallSeats.join(" "));
     }
+
     if (storedBalconySeats) {
-      const balconySeatsArray = JSON.parse(storedBalconySeats).map((seat) => {
+      const balconySeatsArray = Array.isArray(storedBalconySeats)
+        ? storedBalconySeats
+        : storedBalconySeats.split(",");
+      const formattedBalconySeats = balconySeatsArray.map((seat) => {
         const seatNameMatch = seat.match(/[A-Z]+\d+/);
         return seatNameMatch ? seatNameMatch[0] : seat;
       });
-      setBalconySeats(balconySeatsArray.join(" "));
+      setBalconySeats(formattedBalconySeats.join(" "));
     }
-  }, []);
+  }, [storedStallSeats, storedBalconySeats]);
+
+  useEffect(() => {
+    if (movieId) {
+      fetchMovieData();
+    }
+  }, [movieId]);
+
+  console.log(movieData);
+
+  const fetchMovieData = async () => {
+    try {
+      if (!movieId) {
+        throw new Error("Invalid movieId");
+      }
+      const { data, error } = await supabase
+        .from("movies")
+        .select("*")
+        .eq("id", movieId)
+        .single();
+      if (error) throw error;
+      if (data) {
+        setMovieData(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const queryParams = `?date=${date}&time=${showTime}&theatre=${theatre}&screen=${screen}&theatreId=${theatreId}&movieId=${movieId}&stallSeats=${storedStallSeats}&balconySeats=${storedBalconySeats}`;
 
   return (
     <div className="bg-gray-100 ">
@@ -114,11 +147,13 @@ function Payment() {
             <div className="mt-8 p-6 bg-white rounded-md">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold w-1/2">
-                  The Ministry of Ungentlemanly Warfare
+                  {movieData ? movieData.title : "Loading..."}
                 </h3>
                 <div>
                   <p className="text-gray-600 text-right">Time</p>
-                  <p className="text-sm font-semibold">16 Jan 2024, 14:40</p>
+                  <p className="text-sm font-semibold">
+                    {date}, {showTime}
+                  </p>
                 </div>
               </div>
               <div className="flex justify-between items-center w-1/2 mb-4">
@@ -166,7 +201,10 @@ function Payment() {
               </div>
             </div>
             <div className="mt-8">
-              <Link href={`/movies/id/seats/payment/success`} passHref>
+              <Link
+                href={`/movies/id/seats/payment/success${queryParams}`}
+                passHref
+              >
                 <button className="w-full bg-purple-500 hover:bg-purple-700 text-white font-semibold py-3 rounded-md">
                   PAYMENT
                 </button>
@@ -175,7 +213,7 @@ function Payment() {
           </div>
           <div className="order-1 md:w-1/3 md:h-[80vh] ">
             <img
-              src="/indian2.png"
+              src={movieData?.poster}
               alt="Movie Poster"
               className="rounded-lg  w-full mt-6  object-cover"
             />

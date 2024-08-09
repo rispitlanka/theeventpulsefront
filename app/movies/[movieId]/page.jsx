@@ -260,14 +260,29 @@ function Movie() {
       const theatre = theatres.find((theatre) => theatre.id == theatreId);
       return (
         <div key={theatreId} className="w-3/4 pb-5 mt-4">
-          <h4 className="text-xl font-semibold">
-            {theatre ? theatre.name : "loading"}
-          </h4>
+          <div className="flex items-center space-x-2 pb-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1rem"
+              height="1rem"
+              viewBox="0 0 56 56"
+              className="h-8 w-8 text-gray-700 "
+            >
+              <path
+                fill="currentColor"
+                d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m-9.352-10.851c-.562-.422-.656-1.102-.328-2.063l2.86-8.554l-7.313-5.227c-.844-.586-1.148-1.242-.96-1.898c.21-.633.866-.961 1.874-.961l9 .07l2.742-8.602c.282-.96.774-1.476 1.477-1.476s1.172.515 1.477 1.476l2.742 8.602l8.976-.07c1.032 0 1.64.328 1.875.96c.235.657-.117 1.313-.937 1.899l-7.336 5.227l2.86 8.554c.327.961.234 1.64-.306 2.063c-.585.445-1.265.28-2.085-.328L28 35.407l-7.266 5.32c-.844.609-1.523.773-2.086.328"
+              ></path>
+            </svg>
+            <h4 className="text-lg font-bold text-gray-800">
+              {theatre ? theatre.name : "loading"}
+            </h4>
+          </div>
+          <h2 className="text-sm pl-3 text-gray-600">{theatre.address}</h2>
           {groupedShows[theatreId].map(
             ({ screen, shows }) =>
               shows.length > 0 && (
-                <div key={screen.id} className="mt-2">
-                  <h5 className="text-sm pb-2 font-semibold">
+                <div key={screen.id} className="mt-4">
+                  <h5 className="text-lg pb-2 font-semibold">
                     {screen ? screen.name : "loading"}
                   </h5>
                   <div className="flex flex-wrap">
@@ -289,8 +304,9 @@ function Movie() {
                         selectedDate
                       )}&time=${showTime?.time}&theatre=${
                         theatre.name
-                      }&screen=${screen.name}`;
-                      console.log(show);
+                      }&screen=${screen.name}&showId=${show.id} }&screenId=${
+                        show.screenId
+                      }&theatreId=${show.theatreId}&movieId=${movieId}`;
 
                       return (
                         <Link
@@ -327,9 +343,7 @@ function Movie() {
       <header className="absolute top-0 bg-white left-0 right-0 z-50">
         <div className=" mx-auto">
           <nav className="flex items-center justify-between py-2 px-2">
-            <h1 className="text-sm md:text-lg font-extrabold">
-              TheTicketBooking
-            </h1>
+            <h1 className="text-sm md:text-lg font-extrabold">Seat Snaps</h1>
 
             <div className="hidden md:block">
               <ul className="flex space-x-6">

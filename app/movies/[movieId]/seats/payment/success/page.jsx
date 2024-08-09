@@ -1,33 +1,95 @@
 "use client";
 import Navbar from "@/app/components/navBar";
+import { useSearchParams } from "next/navigation";
 import React from "react";
 import { useEffect, useState } from "react";
+import { supabase } from "./../../../../../supabaseClient";
 
 function Success() {
   const [stallSeats, setStallSeats] = useState("");
   const [balconySeats, setBalconySeats] = useState("");
+  const [movieData, setMovieData] = useState([]);
+  const [theatreData, setTheatreData] = useState([]);
+
+  const searchParams = useSearchParams();
+  const date = searchParams.get("date");
+  const showTime = searchParams.get("time");
+  const storedStallSeats = searchParams.get("stallSeats");
+  const storedBalconySeats = searchParams.get("balconySeats");
+  const movieId = searchParams.get("movieId");
+  const theatre = searchParams.get("theatre");
+  const theatreId = searchParams.get("theatreId");
+  const screen = searchParams.get("screen");
 
   useEffect(() => {
-    const storedStallSeats = sessionStorage.getItem("selectedStallSeats");
-    const storedBalconySeats = sessionStorage.getItem("selectedBalconySeats");
-
     if (storedStallSeats) {
-      const stallSeatsArray = JSON.parse(storedStallSeats).map((seat) => {
-        // Extract only the seat name (e.g., A12) from the key
+      // Split the stored string into an array if it isn't already an array
+      const stallSeatsArray = Array.isArray(storedStallSeats)
+        ? storedStallSeats
+        : storedStallSeats.split(",");
+      const formattedStallSeats = stallSeatsArray.map((seat) => {
         const seatNameMatch = seat.match(/[A-Z]+\d+/);
         return seatNameMatch ? seatNameMatch[0] : seat;
       });
-      setStallSeats(stallSeatsArray.join(" "));
+      setStallSeats(formattedStallSeats.join(" "));
     }
+
     if (storedBalconySeats) {
-      const balconySeatsArray = JSON.parse(storedBalconySeats).map((seat) => {
-        // Extract only the seat name (e.g., A12) from the key
+      const balconySeatsArray = Array.isArray(storedBalconySeats)
+        ? storedBalconySeats
+        : storedBalconySeats.split(",");
+      const formattedBalconySeats = balconySeatsArray.map((seat) => {
         const seatNameMatch = seat.match(/[A-Z]+\d+/);
         return seatNameMatch ? seatNameMatch[0] : seat;
       });
-      setBalconySeats(balconySeatsArray.join(" "));
+      setBalconySeats(formattedBalconySeats.join(" "));
     }
-  }, []);
+  }, [storedStallSeats, storedBalconySeats]);
+
+  useEffect(() => {
+    if (movieId) {
+      fetchMovieData();
+    }
+  }, [movieId]);
+
+  useEffect(() => {
+    if (theatreId) {
+      fetchTheatreData();
+    }
+  }, [theatreId]);
+
+  console.log(theatreData);
+
+  const fetchMovieData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("movies")
+        .select("*")
+        .eq("id", movieId);
+      if (error) throw error;
+      if (data) {
+        setMovieData(data[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchTheatreData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("theatres")
+        .select("*")
+        .eq("id", theatreId);
+      if (error) throw error;
+      if (data) {
+        setTheatreData(data[0]);
+        console.log(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -57,7 +119,7 @@ function Success() {
           <div className="p-6 md:flex">
             <div className="md:w-1/3 px-4">
               <img
-                src="/indian2.png" // Update the path to your movie poster image
+                src={movieData?.poster}
                 alt="Movie Poster"
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -66,14 +128,16 @@ function Success() {
               <div className="md:w-2/3 border-r-4 border-dashed  py-6 pr-8 border-gray-300 ">
                 <div className=" ">
                   <h2 className="text-2xl w-3/4   pb-4 pt-3  font-bold">
-                    The Ministry of Ungentlemanly Warfare
+                    {movieData ? movieData.title : "Loading..."}
                   </h2>
 
                   <div>
                     <p className=" pb-4">
                       {" "}
                       screen:
-                      <span className="font-bold">Regal [ SILVER 2D ]</span>
+                      <span className="font-bold">
+                        {theatre} [ {screen} ]{" "}
+                      </span>
                     </p>
 
                     <div className="flex space-x-10 justify-between">
@@ -101,14 +165,14 @@ function Success() {
                         </div>
                         <div>
                           <p className="mr-6 pr-4">
-                            3rd floor, Cargills square,
+                            {theatreData ? theatreData.address : "Loading..."}
+                            {}
                           </p>
-                          <p className="mr-6 pr-4">Hospital road, Sri Lanka</p>
                         </div>
                       </div>
                       <div className="text-slate-700 font-bold">
-                        <p className="">16 Jan 2024</p>
-                        <p className=""> 14:40</p>
+                        <p className="">{date}</p>
+                        <p className=""> {showTime}</p>
                       </div>
                     </div>
                   </div>
