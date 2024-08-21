@@ -4,7 +4,6 @@ import Image from "next/image";
 import Navbar from "@/app/components/navBar";
 import Link from "next/link";
 import "../seats/seatstyle.css";
-//import { useParams } from "next/navigation";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "./../../../supabaseClient";
 
@@ -16,6 +15,10 @@ const Seats = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [zonesData, setZonesData] = useState([]);
+  const [seatData, setSeatData] = useState([]);
+  const [maxColumn, setMaxColumn] = useState();
+
+  const [zones, setZones] = useState({});
   const [screens, setScreens] = useState([]);
   const [movieData, setMovieData] = useState([]);
 
@@ -39,6 +42,12 @@ const Seats = () => {
   }, [showTime]);
 
   useEffect(() => {
+    fetchSeatData();
+  }, []);
+
+  const [zoneNames, setZoneNames] = useState({});
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       await fetchMovieData();
@@ -47,6 +56,7 @@ const Seats = () => {
       // await fetchBookedTickets();
       // await fetchOtherShows();
       await fetchScreens();
+
       setIsLoading(false);
     };
     fetchData();
@@ -62,6 +72,11 @@ const Seats = () => {
       if (data) {
         setZonesData(data);
         setIsLoading(false);
+        const names = data.reduce((acc, zone) => {
+          acc[zone.id] = zone.name;
+          return acc;
+        }, {});
+        setZoneNames(names);
       }
     } catch (error) {
       console.log(error);
@@ -161,6 +176,73 @@ const Seats = () => {
     }
   };
 
+  const groupSeatDataByZone = (seatData, totalColumns) => {
+    const zonesMap = {};
+
+    seatData.forEach((seat) => {
+      const zoneId = seat.zoneId;
+      const rowIndex = seat.row - 1;
+      const columnIndex = seat.column - 1;
+      const column = seat.column;
+
+      // Initialize the zone if not already present
+      if (!zonesMap[zoneId]) {
+        zonesMap[zoneId] = [];
+      }
+
+      // Initialize the row if not already present
+      if (!zonesMap[zoneId][rowIndex]) {
+        zonesMap[zoneId][rowIndex] = new Array(totalColumns).fill(null);
+      }
+
+      // Add the seat or a placeholder based on the column index
+      zonesMap[zoneId][rowIndex][columnIndex] = {
+        number: seat.seatName,
+        column: column,
+        status: seat.status || "available", // Use actual status if available
+        isSeat: true,
+      };
+    });
+
+    // Fill in empty slots with placeholders if necessary
+    for (const zoneId in zonesMap) {
+      zonesMap[zoneId].forEach((row, rowIndex) => {
+        for (let i = 0; i < totalColumns; i++) {
+          if (!row[i]) {
+            row[i] = {
+              isSeat: false,
+            };
+          }
+        }
+      });
+    }
+
+    console.log(zonesMap);
+    return zonesMap;
+  };
+  const fetchSeatData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("seats")
+        .select("*")
+        .eq("screenId", screenId); // Fetching all zones for the screen
+
+      if (error) throw error;
+
+      if (data) {
+        const maxColumn = Math.max(
+          ...data.map((seat) => parseInt(seat.column))
+        );
+        setMaxColumn(maxColumn);
+        const groupedData = groupSeatDataByZone(data, maxColumn);
+        setZones(groupedData);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // const fetchBookedTickets = async () => {
   //   try {
   //     const { data, error } = await supabase
@@ -205,253 +287,193 @@ const Seats = () => {
 
   const queryParams = `?date=${date}&time=${formattedTime}&theatre=${theatre}&screen=${screen}&theatreId=${theatreId}&movieId=${movieId}&stallSeats=${selectedStallSeats}&balconySeats=${selectedBalconySeats}`;
 
-  const handleMouseEnter = (section, side, rowIndex, seatIndex) => {
-    const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
-      65 + rowIndex
-    )}${side === "right" ? seatIndex + 14 : seatIndex + 1}`;
+  const handleSeatClick = (zoneId, row, seat) => {
+    const seatKey = `zone-${zoneId}-${seat.number}`;
+    setSelectedBalconySeats((prev) =>
+      prev.includes(seatKey)
+        ? prev.filter((s) => s !== seatKey)
+        : [...prev, seatKey]
+    );
+  };
+  console.log(selectedBalconySeats);
+  const handleMouseEnter = (zoneId, row, seat) => {
+    const seatKey = `zone-${zoneId}-${seat.number}`;
     setSeatHovered((prev) => ({
       ...prev,
       [seatKey]: true,
     }));
   };
 
-  const handleMouseLeave = (section, side, rowIndex, seatIndex) => {
-    const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
-      65 + rowIndex
-    )}${side === "right" ? seatIndex + 14 : seatIndex + 1}`;
+  const handleMouseLeave = (zoneId, row, seat) => {
+    const seatKey = `zone-${zoneId}-${seat.number}`;
     setSeatHovered((prev) => ({
       ...prev,
       [seatKey]: false,
     }));
   };
 
-  const seats = {
-    stalls: {
-      left: Array.from({ length: 14 }, (_, rowIndex) =>
-        Array.from({ length: 13 }, (_, seatIndex) => ({
-          number: `${seatIndex + 1}`,
-          status: "available",
-        }))
-      ),
-      right: Array.from({ length: 14 }, (_, rowIndex) =>
-        Array.from({ length: 12 }, (_, seatIndex) => ({
-          number: `${seatIndex + 14}`,
-          status: "available",
-        }))
-      ),
-    },
-    balcony: Array.from({ length: 6 }, (_, rowIndex) =>
-      Array.from({ length: 20 }, (_, seatIndex) => ({
-        number: `${seatIndex + 1}`, //`${String.fromCharCode(65 + rowIndex)}${seatIndex + 1}`,
-        status: "available",
-      }))
-    ),
-  };
-
-  const handleSeatClick = (section, side, rowIndex, seatIndex) => {
-    const seatKey = `${section}-${side ? `${side}-` : ""}${String.fromCharCode(
-      65 + rowIndex
-    )}${side === "right" ? seatIndex + 14 : seatIndex + 1}`;
-
-    if (section === "stalls") {
-      setSelectedStallSeats((prev) =>
-        prev.includes(seatKey)
-          ? prev.filter((s) => s !== seatKey)
-          : [...prev, seatKey]
-      );
-    } else if (section === "balcony") {
-      setSelectedBalconySeats((prev) =>
-        prev.includes(seatKey)
-          ? prev.filter((s) => s !== seatKey)
-          : [...prev, seatKey]
-      );
-    }
-  };
-
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const renderSeats = (section, side) => {
-    return seats[section][side].map((row, rowIndex) => (
-      <div className="flex justify-center" key={rowIndex}>
-        {side === "left" && (
-          <div className="flex items-center mr-2">
-            {String.fromCharCode(65 + rowIndex)}
-          </div>
-        )}
-        {row.map((seat, seatIndex) => {
-          const seatKey = `${section}-${
-            side ? `${side}-` : ""
-          }${String.fromCharCode(65 + rowIndex)}${
-            side === "right" ? seatIndex + 14 : seatIndex + 1
-          }`;
-          const isSelected =
-            selectedStallSeats.includes(seatKey) ||
-            selectedBalconySeats.includes(seatKey);
-          const isHovered = seatHovered[seatKey];
+  const renderAllZonesSeats = () => {
+    return Object.keys(zones).map((zoneId) => {
+      const zoneSeats = zones[zoneId] || [];
+      const zoneName = zoneNames[zoneId] || `Zone ${zoneId}`;
 
-          return (
-            <div
-              key={seatIndex}
-              className={`w-8 h-8 m-1 rounded-lg flex items-center justify-center cursor-pointer bg-gray-100`}
-              style={{ position: "relative" }}
-            >
-              <svg
-                width="20"
-                height="23.33"
-                viewBox="0 0 30 35"
-                xmlns="http://www.w3.org/2000/svg"
-                onClick={() =>
-                  handleSeatClick(section, side, rowIndex, seatIndex)
-                }
-                onMouseEnter={() =>
-                  handleMouseEnter(section, side, rowIndex, seatIndex)
-                }
-                onMouseLeave={() =>
-                  handleMouseLeave(section, side, rowIndex, seatIndex)
-                }
-                className="seat-icon"
-              >
-                <path
-                  d="M3.74219 6C3.74219 2.68629 6.42848 0 9.74219 0H20.7422C24.0559 0 26.7422 2.68629 26.7422 6V24H3.74219V6Z"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                  className="seat-icon"
-                  // onMouseEnter={() =>
-                  //   handleMouseEnter(section, side, rowIndex, seatIndex)
-                  // }
-                  // onMouseLeave={() =>
-                  //   handleMouseLeave(section, side, rowIndex, seatIndex)
-                  // }
-                />
-                <rect
-                  x="3.74219"
-                  y="26"
-                  width="23"
-                  height="9"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                  className="seat-icon"
-                />
-                <rect
-                  x="24.7422"
-                  y="16"
-                  width="5"
-                  height="16"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                  className="seat-icon"
-                />
-                <rect
-                  x="0.742188"
-                  y="16"
-                  width="5"
-                  height="16"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                  className="seat-icon"
-                />
-              </svg>
-              {(isHovered || isSelected) && (
-                <span className="text-white font-semibold text-xs mb-2 absolute seat-icon">
-                  {seat.number}
-                </span>
-              )}
+      return (
+        <div key={zoneId} className="zone-container mb-8">
+          <div className="mt-8 text-gray-500 mb-5 text-center">{zoneName}</div>
+          {zoneSeats.length > 0 ? (
+            <div>
+              {/* Static Column Names */}
+              <div className="flex justify-center mb-2">
+                <div className="flex items-center mr-2"></div>{" "}
+                {/* Empty for alignment */}
+              </div>
+
+              {zoneSeats.map((row, rowIndex) => (
+                <div className="flex justify-center mb-2" key={rowIndex}>
+                  {/* Static Row Name */}
+                  <div className="flex items-center mr-2 text-lg font-medium">
+                    {String.fromCharCode(65 + rowIndex)}
+                  </div>
+                  {/* Seats */}
+                  {row.map((seat, seatIndex) => {
+                    const seatKey = `zone-${zoneId}-${seat.number}`;
+
+                    const isSelected = selectedBalconySeats.includes(seatKey);
+                    const isHovered = seatHovered[seatKey];
+                    const isActive = seat.isSeat;
+
+                    return (
+                      <>
+                        {isActive ? (
+                          <div
+                            key={seatIndex}
+                            className={`w-8 h-8 m-1 rounded-lg flex items-center justify-center cursor-pointer bg-gray-100 transition-colors duration-200`}
+                            style={{ position: "relative" }}
+                            onClick={() =>
+                              handleSeatClick(zoneId, seat.row, seat)
+                            }
+                            onMouseEnter={() =>
+                              handleMouseEnter(zoneId, seat.row, seat)
+                            }
+                            onMouseLeave={() =>
+                              handleMouseLeave(zoneId, seat.row, seat)
+                            }
+                          >
+                            <svg
+                              width="20"
+                              height="23.33"
+                              viewBox="0 0 30 35"
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="seat-icon"
+                            >
+                              <path
+                                d="M3.74219 6C3.74219 2.68629 6.42848 0 9.74219 0H20.7422C24.0559 0 26.7422 2.68629 26.7422 6V24H3.74219V6Z"
+                                fill={
+                                  isHovered || isSelected
+                                    ? "#1CCE83"
+                                    : "#CE1C1C"
+                                }
+                              />
+                              <rect
+                                x="3.74219"
+                                y="26"
+                                width="23"
+                                height="9"
+                                fill={
+                                  isHovered || isSelected
+                                    ? "#1CCE83"
+                                    : "#CE1C1C"
+                                }
+                              />
+                              <rect
+                                x="24.7422"
+                                y="16"
+                                width="5"
+                                height="16"
+                                fill={
+                                  isHovered || isSelected
+                                    ? "#1CCE83"
+                                    : "#CE1C1C"
+                                }
+                              />
+                              <rect
+                                x="0.742188"
+                                y="16"
+                                width="5"
+                                height="16"
+                                fill={
+                                  isHovered || isSelected
+                                    ? "#1CCE83"
+                                    : "#CE1C1C"
+                                }
+                              />
+                            </svg>
+                            {(isHovered || isSelected) && (
+                              <span className="text-white font-semibold text-xs mb-2 absolute seat-icon">
+                                {seat.column}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div
+                            key={seatIndex}
+                            className={`w-8 h-8 m-1 rounded-lg flex items-center justify-center cursor-pointer bg-gray-100 transition-colors duration-200`}
+                            style={{ position: "relative" }}
+                            onClick={() =>
+                              handleSeatClick(
+                                zoneId,
+                                seat.row,
+                                rowIndex,
+                                seatIndex
+                              )
+                            }
+                            onMouseEnter={() =>
+                              handleMouseEnter(
+                                zoneId,
+                                seat.row,
+                                rowIndex,
+                                seatIndex
+                              )
+                            }
+                            onMouseLeave={() =>
+                              handleMouseLeave(
+                                zoneId,
+                                seat.row,
+                                rowIndex,
+                                seatIndex
+                              )
+                            }
+                          >
+                            {(isHovered || isSelected) && (
+                              <span className="text-white text-xs absolute bottom-1">
+                                {seat.row}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })}
+                  {/* Static Row Name */}
+                  <div className="flex items-center ml-2 text-lg font-medium">
+                    {String.fromCharCode(65 + rowIndex)}
+                  </div>
+                </div>
+              ))}
             </div>
-          );
-        })}
-        {side === "right" && (
-          <div className="flex items-center ml-2">
-            {String.fromCharCode(65 + rowIndex)}
-          </div>
-        )}
-      </div>
-    ));
-  };
-
-  const renderBalconySeats = () => {
-    return seats.balcony.map((row, rowIndex) => (
-      <div className="flex justify-center" key={rowIndex}>
-        <div className="flex items-center mr-2">
-          {String.fromCharCode(65 + rowIndex)}
-        </div>
-        {row.map((seat, seatIndex) => {
-          const seatKey = `balcony-${String.fromCharCode(65 + rowIndex)}${
-            seatIndex + 1
-          }`;
-          const isSelected = selectedBalconySeats.includes(seatKey);
-          const isHovered = seatHovered[seatKey];
-
-          return (
-            <div
-              key={seatIndex}
-              className={`w-8 h-8 m-1 rounded-lg flex items-center justify-center cursor-pointer bg-gray-100`}
-              style={{ position: "relative" }}
-            >
-              <svg
-                width="20"
-                height="23.33"
-                viewBox="0 0 30 35"
-                xmlns="http://www.w3.org/2000/svg"
-                onClick={() =>
-                  handleSeatClick("balcony", null, rowIndex, seatIndex)
-                }
-                onMouseEnter={() =>
-                  handleMouseEnter("balcony", null, rowIndex, seatIndex)
-                }
-                onMouseLeave={() =>
-                  handleMouseLeave("balcony", null, rowIndex, seatIndex)
-                }
-                className="seat-icon"
-              >
-                <path
-                  d="M3.74219 6C3.74219 2.68629 6.42848 0 9.74219 0H20.7422C24.0559 0 26.7422 2.68629 26.7422 6V24H3.74219V6Z"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                />
-                <rect
-                  x="3.74219"
-                  y="26"
-                  width="23"
-                  height="9"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                />
-                <rect
-                  x="24.7422"
-                  y="16"
-                  width="5"
-                  height="16"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                />
-                <rect
-                  x="0.742188"
-                  y="16"
-                  width="5"
-                  height="16"
-                  fill={isHovered || isSelected ? "#1CCE83" : "#CE1C1C"}
-                />
-              </svg>
-              {(isHovered || isSelected) && (
-                <span className="text-white text-xs mb-2 absolute">
-                  {seat.number}
-                </span>
-              )}
+          ) : (
+            <div className="text-gray-500">
+              No seats available in this zone.
             </div>
-          );
-        })}
-        <div className="flex items-center ml-2">
-          {String.fromCharCode(65 + rowIndex)}
+          )}
         </div>
-      </div>
-    ));
+      );
+    });
   };
-
-  // const handleConfirm = () => {
-  //   sessionStorage.setItem(
-  //     "selectedStallSeats",
-  //     JSON.stringify(selectedStallSeats)
-  //   );
-  //   sessionStorage.setItem(
-  //     "selectedBalconySeats",
-  //     JSON.stringify(selectedBalconySeats)
-  //   );
-  // };
 
   return (
     <div className="relative bg-gray-100 min-h-screen">
@@ -565,19 +587,8 @@ const Seats = () => {
             </svg>
           </div>
 
-          <div className="mt-2 text-gray-500 text-center">Stalls seats</div>
-          <div className=" mt-4 overflow-x-auto">
-            <div className="flex justify-center">
-              <div className="mr-8">{renderSeats("stalls", "left")}</div>
-              <div className="ml-8">{renderSeats("stalls", "right")}</div>
-            </div>
-          </div>
-
-          <div className="mt-8 text-gray-500 mb-5 text-center">
-            Balcony Seats
-          </div>
-          <div className=" p-4  mt-4 overflow-x-auto">
-            {renderBalconySeats()}
+          <div className=" p-4 mx-2  mt-4 overflow-x-auto">
+            {renderAllZonesSeats()}
           </div>
         </div>
       </section>

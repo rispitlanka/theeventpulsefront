@@ -19,7 +19,7 @@ function Navbar() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/our-theaters" passHref>
+                  <Link href="/our_theatres" passHref>
                     <span className="font-semibold text-sm cursor-pointer">
                       Our Theaters
                     </span>

@@ -59,16 +59,13 @@ const Theaters = () => {
         </button>
         <div className="flex space-x-4 overflow-hidden">
           {theatres.slice(0, 3).map((theatre) => (
-            <div
-              key={theatre.id}
-              className="relative w-64 h-64 flex-shrink-0 bg-gray-200"
-            >
+            <div key={theatre.id} className="relative w-64 h-64 flex-shrink-0 ">
               <Image
                 src={theatre.theatreImage}
                 alt={theatre.name}
                 fill
                 style={{ objectFit: "cover" }}
-                className="rounded shadow-lg"
+                className="rounded-lg shadow-lg"
               />
               <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 text-left rounded-b-lg">
                 <p className="font-semibold">{theatre.name}</p>

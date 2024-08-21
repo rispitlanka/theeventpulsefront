@@ -83,8 +83,7 @@ const Movies = () => {
         )
         .in("id", movieIds);
 
-      console.log(moviesQuery);
-      console.log(genre);
+
       if (genre) {
         moviesQuery = moviesQuery.filter("movie_genre.genres.id", "eq", genre);
       }

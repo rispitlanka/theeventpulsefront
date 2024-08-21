@@ -10,6 +10,9 @@ function Movie() {
   const [movieData, setMovieData] = useState([]);
   const [relatedMovies, setRelatedMovies] = useState([]);
   const [movieGenres, setMovieGenres] = useState([]);
+  const [movieCast, setMovieCast] = useState([]);
+  const [movieCrew, setMovieCrew] = useState([]);
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [shows, setShows] = useState([]);
   const [showTimes, setShowTimes] = useState([]);
@@ -142,6 +145,10 @@ function Movie() {
   };
 
   useEffect(() => {
+    fetchShows(selectedDate);
+  }, [selectedDate]);
+
+  useEffect(() => {
     if (movieId) {
       // Fetch movie data from Supabase
       const fetchMovieData = async () => {
@@ -150,12 +157,20 @@ function Movie() {
           .select(
             `
             *,
-            movie_genre (*, 
+            movie_genre (
               genre_id,
-             genres (genre_name)
-            ),  movie_language (*, 
+              genres (genre_name)
+            ),
+            movie_language (
               language_id,
-             languages (language_name)
+              languages (language_name)
+            ),
+            movie_cast (
+              cast_id,
+              cast (*)
+            ), movie_crew(
+              crew_id,
+              crew (*)
             )
           `
           )
@@ -168,6 +183,20 @@ function Movie() {
           setMovieData(movie);
           setMovieGenres(
             movie.movie_genre.map((genre) => genre.genres.genre_name)
+          );
+          setMovieCast(
+            movie.movie_cast.map((cast) => ({
+              name: cast.cast.name,
+              category: cast.cast.category,
+              image: cast.cast.image,
+            }))
+          );
+          setMovieCrew(
+            movie.movie_crew.map((crew) => ({
+              name: crew.crew.name,
+              category: crew.crew.category,
+              image: crew.crew.image,
+            }))
           );
         }
       };
@@ -184,7 +213,7 @@ function Movie() {
         const { data: movies, error } = await supabase
           .from("movies")
           .select("*")
-          .neq("id", movieId) // Exclude the current movie
+          .neq("id", movieId)
           .limit(5);
 
         if (error) {
@@ -227,8 +256,6 @@ function Movie() {
 
   const groupedShows = groupShowsByTheatreAndScreen();
 
-  console.log(selectedShowTime);
-
   const handleShowTimeClick = (show) => {
     console.log(show);
     setSelectedShowTime(show);
@@ -241,11 +268,7 @@ function Movie() {
     } ${selectedDate.getFullYear()} ${formattedTime}`;
     console.log(formattedDateTime);
     setSelectedDateTime(formattedDateTime);
-
-    console.log(selectedDateTime);
   };
-
-  console.log(selectedDateTime);
 
   const renderGroupedShows = () => {
     const theatresWithShows = Object.keys(groupedShows).filter((theatreId) =>
@@ -253,13 +276,29 @@ function Movie() {
     );
 
     if (theatresWithShows.length === 0) {
-      return <div className="w-3/4 pb-5 mt-4">No shows available.</div>;
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1rem"
+            height="1rem"
+            viewBox="0 0 24 24"
+            className="h-10 w-10 mb-4 text-gray-400"
+          >
+            <path
+              fill="currentColor"
+              d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0s.41-1.08 0-1.49zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5S14 7.01 14 9.5S11.99 14 9.5 14"
+            ></path>
+          </svg>
+          <span className="text-gray-500 text-lg font-semibold">No Result</span>
+        </div>
+      );
     }
 
     return theatresWithShows.map((theatreId) => {
       const theatre = theatres.find((theatre) => theatre.id == theatreId);
       return (
-        <div key={theatreId} className="w-3/4 pb-5 mt-4">
+        <div key={theatreId} className="w-3/4 pb-5 mt-4 ">
           <div className="flex items-center space-x-2 pb-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -440,13 +479,7 @@ function Movie() {
                   {formatDuration(movieData.duration)}
                 </span>
               </div>
-              <p className="text-sm mt-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-                scelerisque ultrices lorem, et feugiat risus ultricies eu.
-                Nullam vel libero eget elit volutpat elementum. Cras sit amet
-                sem sed elit malesuada volutpat. Curabitur ultricies libero ac
-                nibh tincidunt, non facilisis tortor cursus.
-              </p>
+              <p className="text-sm mt-4">{movieData.synopsis}</p>
               <div className="flex flex-wrap mt-4">
                 {movieGenres.map((genre, index) => (
                   <span
@@ -458,26 +491,50 @@ function Movie() {
                 ))}
               </div>
 
-              <h2 className="text-xl font-semibold mt-4 mb-4">
-                Role in the Film
-              </h2>
+              <h2 className="text-xl font-semibold mt-4 mb-4">Cast</h2>
               <div className="flex space-x-4 items-center mx-auto mt-2 m">
-                {["Actor", "Director", "Musician"].map((role) => (
-                  <div key={role} className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full mb-3"></div>
-                    <span className="text-sm font-semibold">{role}</span>
+                {movieCast?.map((cast, index) => (
+                  <div key={index} className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-gray-300 rounded-full mb-3 overflow-hidden">
+                      {cast.image ? (
+                        <img
+                          src={cast.image}
+                          alt={cast.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-gray-300">
+                          <span className="text-sm text-gray-500">
+                            No Image
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-sm font-semibold">{cast.name}</span>
                   </div>
                 ))}
               </div>
-              <h2 className="text-xl font-semibold mt-4 mb-4 ">
-                Peripheral roles
-              </h2>
+              <h2 className="text-xl font-semibold mt-4 mb-4 ">Crew</h2>
               <div className="flex space-x-4 mt-2 mb-4">
-                {["Emily", "Sophia", "John"].map((role, index) => (
+                {movieCrew?.map((crew, index) => (
                   <div key={index} className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-gray-300 rounded-lg"></div>
+                    <div className="w-12 h-12 bg-gray-300 rounded-lg overflow-hidden">
+                      {crew.image ? (
+                        <img
+                          src={crew.image}
+                          alt={crew.name}
+                          className="w-full h-full  rounded-lg object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-gray-300">
+                          <span className="text-sm text-gray-500">
+                            No Image
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
-                    <span className="text-xs mt-1">{role}</span>
+                    <span className="text-xs mt-1">{crew.name}</span>
                   </div>
                 ))}
                 <div className=" -pl-4 mt-4">
@@ -556,7 +613,7 @@ function Movie() {
                 </button>
               </div>
 
-              <div className="bg-white p-6 rounded-lg overflow-y-scroll ">
+              <div className="bg-white p-6 rounded-lg overflow-y-scroll min-h-screen">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex relative items-center space-x-1">
                     <svg
@@ -573,7 +630,7 @@ function Movie() {
                     </svg>
                     <input
                       type="text"
-                      className="border rounded-lg px-8 py-2 "
+                      className="border rounded-lg px-8 py-2"
                       placeholder="Search City"
                     />
 

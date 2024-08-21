@@ -15,10 +15,7 @@ export const TopFive = () => {
 
   const fetchMovies = async () => {
     setIsLoading(true);
-    let { data, error } = await supabase
-      .from("movies") // Replace 'movies' with your actual table name
-      .select("*")
-      .limit(5);
+    let { data, error } = await supabase.from("movies").select("*").limit(5);
     console.log(data);
 
     if (error) console.error("Error fetching data:", error);
